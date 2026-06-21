@@ -1,0 +1,14 @@
+/target
+**/*.rs.bk
+build.log
+
+# Local recorder output + secrets — never commit captures or tokens
+/recording
+/recording-*
+/sai-out
+/trajectory-*
+**/screenshots/
+actions.json
+trajectory.jsonl
+manifest.json
+sai-recorder.config.json
