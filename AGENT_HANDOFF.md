@@ -90,14 +90,14 @@ Output: `%APPDATA%\sai-recorder\tasks\<id>\` (meta.json + sai.json).
 
 ## 7. Known issues / blockers
 1. **Input hook wedges INJECTED input during recording.** `rdev::listen` is passive — **physical** mouse/keyboard pass through, so a human can click on-screen Stop or use **Ctrl+Alt+S** (both verified via selftest). But synthetic/automation input is starved → you can't drive Stop via automation; use physical input or kill the process. *Optional hardening:* filter the recorder's own injected events; ensure the capture channel never backpressures the hook thread; add a non-blocking stop path.
-2. **Dashboard shows static sample data.** Only the **Library** screen is data-bound to `list_tasks`. TODO: bind dashboard stats + recent activity, and the **Compression Insights** screen, to real tasks.
-3. **Sidebar nav hidden below ~1024px.** On a 640px window there's no visible nav. Set a larger default/min window size in `tauri.conf.json`, or add a responsive nav fallback.
+2. **Dashboard + Compression Insights now data-bound.** ✅ `pgDashboard` binds the 4 stat cards (Total Recordings, Time Captured, Tokens Saved, Avg Compression) and the Recent Activity table to `list_tasks`; `pgCompression` binds the hero ratio, the proportional Sai bar, and the per-recording token table. Both degrade gracefully to an empty-state row when there are no tasks. (Library was already bound.)
+3. **Sidebar nav.** ✅ Default window is now 1200×800, min 1024×640 in `tauri.conf.json` — always wider than the dashboard's `md:` (768px) sidebar breakpoint, so the nav is always visible. (Requires a rebuild to take effect — config is compiled into the binary.)
 4. **No literal `combined.webp` file.** The player streams keyframes instead. The `image` crate here is still-only; animated-WebP needs native libwebp (risky on GNU/no-MSVC). Optional: add an encoder on an MSVC workspace if a downloadable `.webp` is wanted.
 5. **Naming.** crate/dir/exe/appdata still `sai-recorder`. Rename to `mimic-neo` as one coordinated pass: `Cargo.toml` name, tauri identifier, appdata dir in code, exe, README/docs.
 
 ## 8. Next steps (priority)
 1. **OSWorld measurement pass** — record 5 real tasks (Chrome, LibreOffice Calc, Writer, File Explorer, Notepad per `docs/osworld-tasks.md`) using **physical input**; read each `meta.json` compression block; backfill the **18 `[__]` token placeholders** across `docs/`. Use **real** OSWorld numbers, **not** the selftest's inflated ~700× (selftest frames are near-identical).
-2. **Polish** — data-bind dashboard + compression insights; set a sane default window size so the sidebar shows.
+2. **Polish** — ✅ dashboard + compression insights data-bound; ✅ default window size set so the sidebar shows.
 3. *(Optional)* input-hook hardening · crate rename · combined.webp encoder.
 4. **Finalize DevPost submission** (materials in `docs/`).
 
@@ -106,3 +106,23 @@ Output: `%APPDATA%\sai-recorder\tasks\<id>\` (meta.json + sai.json).
 - Pipeline: `sai-recorder.exe --selftest` → check `%APPDATA%\sai-recorder\tasks\<id>\meta.json`.
 - GUI: launch → onboarding → setup → Start Recording → record with **physical** input → Stop on overlay → Task Detail player → Export JSON/JSONL.
 - Logs: `%APPDATA%\sai-recorder\recorder.log`.
+
+## 10. Message to the next agent
+
+Hi — handing this back to you. Since last time:
+
+- **Polish (§8.2) is done.** Dashboard and Compression Insights are now data-bound to `list_tasks` (stat cards, recent-activity table, hero ratio, per-recording token table). Default window is 1200×800 / min 1024×640 so the sidebar always shows. `cargo build --release` is green; `--selftest` exits 0.
+- **CI/CD added** — [.github/workflows/ci.yml](.github/workflows/ci.yml). Every push/PR to `main` (and manual *Run workflow*) builds for Windows on `windows-latest`, runs the `--selftest` smoke test, and uploads the runnable exe as an artifact. Tag pushes (`v*`) also publish a Release with the exe + MSI/NSIS installers.
+
+**👉 You don't have to build locally first — grab the prebuilt binary and try it:**
+1. GitHub → **Actions** tab → latest **"CI (Windows build)"** run on `main`.
+2. Scroll to **Artifacts** → download **`mimic-neo-windows-x64`** (it's a zip containing `sai-recorder.exe`).
+3. Unzip and run `sai-recorder.exe` on a Windows box with the **WebView2 Runtime** installed (preinstalled on Win10/11). The `ui/` frontend is compiled into the exe — it's self-contained, no separate assets needed.
+4. Smoke-test headless first: `sai-recorder.exe --selftest` → expect `SELFTEST OK ...` and a new task under `%APPDATA%\sai-recorder\tasks\<id>\`.
+5. Then launch the GUI and walk: onboarding → setup → **Start Recording** (use **physical** input — see §7.1) → Stop → Task Detail player → check the **Home** dashboard + **Insights** screens now show real numbers.
+
+If CI hasn't run yet, push any commit to `main` or use **Actions → CI (Windows build) → Run workflow** to trigger it.
+
+The big remaining item is still the **OSWorld measurement pass (§8.1)** — it needs real apps + physical input, which I couldn't do from my environment. Heads-up: the `docs/osworld-tasks.md` / DevPost files referenced in §8 aren't in the repo yet (only `docs/animated-webp-recording.md` exists), so there are currently no `[__]` placeholders to backfill — you may need to author those docs as part of that pass.
+
+⚠️ Rotate the GitHub PAT that's embedded in the `origin` remote URL and reset the remote to a clean `https://github.com/kejiwuxian/Mimic-Neo.git`.
