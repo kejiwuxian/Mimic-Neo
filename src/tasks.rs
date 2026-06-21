@@ -203,6 +203,20 @@ pub fn compact_payload(id: &str) -> Result<String> {
     Err(anyhow!("no payload to send for task {id}"))
 }
 
+pub fn export_jsonl(id: &str) -> Result<String> {
+    let p = task_dir(id).join("trajectory.jsonl");
+    if p.exists() {
+        return Ok(fs::read_to_string(p)?);
+    }
+    let actions = load_actions(id)?;
+    let mut out = String::new();
+    for a in &actions {
+        out.push_str(&serde_json::to_string(a)?);
+        out.push('\n');
+    }
+    Ok(out)
+}
+
 fn truncate(s: &str, max: usize) -> String {
     if s.chars().count() <= max {
         s.to_string()

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Sai Recorder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "primary-container": "#4d8eff",
+                            "on-error": "#690005",
+                            "inverse-surface": "#e1e2ec",
+                            "surface-container-high": "#272a31",
+                            "primary": "#adc6ff",
+                            "on-tertiary-fixed-variant": "#723600",
+                            "on-tertiary": "#502400",
+                            "secondary": "#ffb3ad",
+                            "surface-container-lowest": "#0b0e15",
+                            "surface-tint": "#adc6ff",
+                            "secondary-fixed": "#ffdad7",
+                            "on-secondary": "#68000a",
+                            "tertiary-fixed": "#ffdcc6",
+                            "on-tertiary-container": "#461f00",
+                            "error": "#ffb4ab",
+                            "on-secondary-fixed": "#410004",
+                            "on-tertiary-fixed": "#311400",
+                            "on-surface": "#e1e2ec",
+                            "surface-bright": "#363941",
+                            "on-primary-fixed": "#001a42",
+                            "tertiary-fixed-dim": "#ffb786",
+                            "surface": "#10131a",
+                            "surface-container": "#1d2027",
+                            "inverse-primary": "#005ac2",
+                            "primary-fixed-dim": "#adc6ff",
+                            "on-error-container": "#ffdad6",
+                            "inverse-on-surface": "#2e3038",
+                            "on-primary": "#002e6a",
+                            "surface-dim": "#10131a",
+                            "outline": "#8c909f",
+                            "tertiary-container": "#df7412",
+                            "on-background": "#e1e2ec",
+                            "on-primary-container": "#00285d",
+                            "outline-variant": "#424754",
+                            "secondary-fixed-dim": "#ffb3ad",
+                            "surface-container-highest": "#32353c",
+                            "on-surface-variant": "#c2c6d6",
+                            "surface-container-low": "#191b23",
+                            "error-container": "#93000a",
+                            "surface-variant": "#32353c",
+                            "on-primary-fixed-variant": "#004395",
+                            "primary-fixed": "#d8e2ff",
+                            "on-secondary-container": "#ffaea8",
+                            "secondary-container": "#a40217",
+                            "tertiary": "#ffb786",
+                            "background": "#10131a",
+                            "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                    },
+                    "spacing": {
+                            "gutter": "16px",
+                            "md": "16px",
+                            "xl": "32px",
+                            "lg": "24px",
+                            "container_padding": "24px",
+                            "base": "4px",
+                            "sidebar_width": "260px",
+                            "sm": "8px",
+                            "xs": "4px"
+                    },
+                    "fontFamily": {
+                            "body-lg": ["Inter"],
+                            "headline-md": ["Inter"],
+                            "label-sm": ["Inter"],
+                            "body-sm": ["Inter"],
+                            "label-md": ["Inter"],
+                            "headline-xl": ["Inter"],
+                            "body-md": ["Inter"],
+                            "headline-lg": ["Inter"],
+                            "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                            "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                            "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                            "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                            "mono-label": ["12px", {"lineHeight": "16px", "fontWeight": "450"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(140, 144, 159, 0.3); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(140, 144, 159, 0.5); 
+        }
+        
+        /* Range slider styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #adc6ff;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(173, 198, 255, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #424754;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container dark:bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 z-50 flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined fill">videocam</span>
+</div>
+<div>
+<h1 class="text-headline-lg font-headline-lg font-bold text-primary tracking-tight leading-tight">Sai Recorder</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Automation Hub</p>
+</div>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary text-on-primary py-2.5 px-4 rounded-xl font-label-md flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors active:scale-95 duration-150 ease-out shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">radio_button_checked</span>
+                Start Recording
+            </button>
+</div>
+<div class="flex-1 flex flex-col gap-1 px-2">
+<!-- Home -->
+<a class="text-on-surface-variant px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-label-md font-label-md">Home</span>
+</a>
+<!-- Task Library -->
+<a class="text-on-surface-variant px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_copy</span>
+<span class="text-label-md font-label-md">Task Library</span>
+</a>
+<!-- Replay -->
+<a class="text-on-surface-variant px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px]">play_circle</span>
+<span class="text-label-md font-label-md">Replay</span>
+</a>
+<!-- Export -->
+<a class="text-on-surface-variant px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px]">output</span>
+<span class="text-label-md font-label-md">Export</span>
+</a>
+<!-- Insights -->
+<a class="text-on-surface-variant px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span class="text-label-md font-label-md">Insights</span>
+</a>
+<div class="mt-auto mb-2 px-4 pt-4 border-t border-outline-variant/10"></div>
+<!-- Settings (ACTIVE) -->
+<a class="text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 rounded-r-lg flex items-center gap-3 transition-all active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined text-[20px] fill">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-4 px-6 flex items-center gap-3">
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant/30 object-cover" data-alt="A small circular avatar showing a professional looking person in an office environment, well lit, neutral background, corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2IZkkm6191RQYK1osE__If9Uh4E5Yhy8mtA0Almb0sKwQnpqkSyNu5KL2p_oBE1lNciEiIR_qfEVcPbwBv9kt2tlX_-Kav-1y14-Q8sxLiFbfyxzEspZQa9Je9qiZDACV4rhHHGvkm84toYkDWUXwZxvFnnKNwyfNkgVqS2MBj-E6rGWua4zA5e9lN9p77CpMZryD-McM4qwE1irv7KCgk90Rz8s-3GD-818StUoG3RpHKrptPFB1XK_rwNF7J-otJsiRqrdOqCk"/>
+<div class="flex-1 overflow-hidden">
+<p class="text-label-sm font-label-sm text-on-surface truncate">Admin User</p>
+<p class="text-[10px] text-on-surface-variant truncate">Premium Plan</p>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-[260px] h-screen overflow-y-auto relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-8 sticky top-0 z-40 bg-background/80 backdrop-blur-sm">
+<div class="flex-1">
+<h2 class="text-headline-md font-headline-md font-semibold text-on-surface">Settings</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant/30 mx-2"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-error/10 text-error hover:bg-error/20 transition-colors border border-error/20">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+<span class="text-label-sm font-label-sm font-semibold tracking-wider">REC</span>
+</button>
+</div>
+</header>
+<!-- Settings Content -->
+<div class="px-8 pb-12 pt-4 max-w-5xl mx-auto">
+<!-- Settings Tabs -->
+<div class="flex border-b border-outline-variant/20 mb-8 overflow-x-auto no-scrollbar">
+<button class="px-4 py-3 text-primary border-b-2 border-primary font-label-md text-label-md flex items-center gap-2 whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">videocam</span>
+                    Capture
+                </button>
+<button class="px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 font-label-md text-label-md flex items-center gap-2 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">keyboard</span>
+                    Shortcuts
+                </button>
+<button class="px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 font-label-md text-label-md flex items-center gap-2 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+                    Privacy
+                </button>
+<button class="px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 font-label-md text-label-md flex items-center gap-2 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">extension</span>
+                    Integrations
+                </button>
+<button class="px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 font-label-md text-label-md flex items-center gap-2 transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">person</span>
+                    Account
+                </button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Main Capture Settings (2 columns wide) -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Overlay & Display Options -->
+<section class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10">
+<h3 class="text-headline-sm font-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">visibility</span>
+                            Display Options
+                        </h3>
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-body-lg font-body-lg text-on-surface">Show floating overlay</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Keep controls visible while recording across all screens</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="h-px bg-outline-variant/10 w-full"></div>
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-body-lg font-body-lg text-on-surface">Capture cursor</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Include mouse movements and clicks in recordings</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Quality & Performance -->
+<section class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10">
+<h3 class="text-headline-sm font-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span>
+                            Quality &amp; Performance
+                        </h3>
+<div class="flex flex-col gap-8">
+<div>
+<div class="flex justify-between items-center mb-4">
+<div>
+<h4 class="text-body-lg font-body-lg text-on-surface">Default Compression Level</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Balance between file size and video quality</p>
+</div>
+<span class="text-label-md font-mono-label bg-surface-variant px-2 py-1 rounded text-primary">Balanced (60%)</span>
+</div>
+<input class="w-full h-2 bg-surface-variant rounded-lg appearance-none cursor-pointer" max="100" min="0" type="range" value="60"/>
+<div class="flex justify-between text-label-sm font-label-sm text-on-surface-variant mt-2">
+<span>Small File</span>
+<span>High Quality</span>
+</div>
+</div>
+<div class="h-px bg-outline-variant/10 w-full"></div>
+<div>
+<h4 class="text-body-lg font-body-lg text-on-surface mb-3">Frame Rate Default</h4>
+<div class="flex gap-3">
+<button class="flex-1 py-2 px-4 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant/30 transition-colors font-label-md">24 FPS</button>
+<button class="flex-1 py-2 px-4 rounded-lg bg-primary/10 border border-primary/50 text-primary transition-colors font-label-md">30 FPS</button>
+<button class="flex-1 py-2 px-4 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant/30 transition-colors font-label-md">60 FPS</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions -->
+<section class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10">
+<h3 class="text-headline-sm font-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">keyboard_command_key</span>
+                            Global Shortcuts
+                        </h3>
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2">Global Stop Shortcut</label>
+<div class="relative">
+<input class="w-full bg-surface-container-highest border border-outline-variant/30 rounded-lg px-4 py-3 text-on-surface font-mono-label focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" readonly="" type="text" value="Alt+Shift+R"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-primary transition-colors rounded-md hover:bg-surface-variant/50">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-2">Pressing this combination will immediately stop any active recording.</p>
+</div>
+</section>
+</div>
+<!-- Secondary Info (1 column wide) -->
+<div class="flex flex-col gap-6">
+<!-- Account & System -->
+<section class="bg-surface-container-high rounded-2xl p-6 border border-outline-variant/5 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-lowest flex items-center justify-center mb-4 shadow-inner border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-[32px]">verified</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-1">Sai Recorder</h3>
+<p class="text-body-sm font-mono-label text-on-surface-variant bg-surface-variant/50 px-3 py-1 rounded-full mb-4">v1.2.4</p>
+<div class="w-full bg-surface-container-lowest rounded-lg p-3 border border-outline-variant/10 flex items-center justify-between mb-4">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="text-label-sm font-label-sm">Up to date</span>
+</div>
+<button class="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface underline decoration-outline-variant/30">Check</button>
+</div>
+<button class="w-full py-2 rounded-lg border border-outline-variant/30 text-on-surface hover:bg-surface-variant/30 transition-colors font-label-md">View Changelog</button>
+</div>
+</section>
+<!-- Integrations Summary -->
+<section class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 flex-1">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-headline-sm font-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">hub</span>
+                                Active Integrations
+                            </h3>
+<button class="text-primary hover:text-primary-fixed transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Slack -->
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container hover:bg-surface-container-highest transition-colors border border-transparent hover:border-outline-variant/10 cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#4A154B]/20 flex items-center justify-center text-[#4A154B]">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface">Slack</p>
+<p class="text-label-sm font-label-sm text-primary flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                                            Connected
+                                        </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">more_vert</span>
+</div>
+<!-- OpenAI -->
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container hover:bg-surface-container-highest transition-colors border border-transparent hover:border-outline-variant/10 cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#10A37F]/20 flex items-center justify-center text-[#10A37F]">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface">OpenAI</p>
+<p class="text-label-sm font-label-sm text-primary flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                                            Connected
+                                        </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">more_vert</span>
+</div>
+</div>
+<a class="block text-center text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors mt-6" href="#">Manage all integrations</a>
+</section>
+</div>
+</div>
+<!-- Save Action Bar (Docked bottom of content) -->
+<div class="mt-8 pt-6 border-t border-outline-variant/20 flex justify-end gap-4">
+<button class="px-6 py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/20 transition-colors font-label-md">Discard Changes</button>
+<button class="px-6 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-fixed transition-colors font-label-md shadow-lg shadow-primary/20">Save Settings</button>
+</div>
+</div>
+</main>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Settings -->

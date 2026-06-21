@@ -293,6 +293,79 @@ pub fn send_task_telegram(id: String) -> Result<(), String> {
     telegram::send(&cfg, &payload).map_err(|e| e)
 }
 
+// ── Playback / Export ────────────────────────────────────────────────────────
+
+#[derive(serde::Serialize)]
+pub struct PlaybackFrame {
+    pub src: String,
+    pub t_ms: f64,
+    pub label: String,
+}
+
+#[derive(serde::Serialize)]
+pub struct PlaybackDto {
+    pub frames: Vec<PlaybackFrame>,
+    pub duration_ms: f64,
+    pub count: usize,
+}
+
+fn variant_label(a: &crate::actions::UserAction) -> String {
+    use crate::actions::UserAction::*;
+    match a {
+        Hover { .. } => "Hover".into(),
+        Click { .. } => "Click".into(),
+        DoubleClick { .. } => "Double Click".into(),
+        TripleClick { .. } => "Triple Click".into(),
+        Drag { .. } => "Drag".into(),
+        Scroll { .. } => "Scroll".into(),
+        Type { .. } => "Type".into(),
+        Press { .. } => "Press".into(),
+    }
+}
+
+#[tauri::command]
+pub fn get_task_playback(id: String) -> Result<PlaybackDto, String> {
+    let actions = crate::tasks::load_actions(&id).map_err(|e| e.to_string())?;
+    let mut frames: Vec<PlaybackFrame> = Vec::new();
+    for a in &actions {
+        let b = a.base();
+        let label = variant_label(a);
+        for (src, t) in [
+            (&b.before.capture, b.timestamp),
+            (&b.after.capture, b.timestamp + b.duration),
+        ] {
+            if src.is_empty() {
+                continue;
+            }
+            if frames.last().map(|f| &f.src == src).unwrap_or(false) {
+                continue;
+            }
+            frames.push(PlaybackFrame {
+                src: src.clone(),
+                t_ms: t,
+                label: label.clone(),
+            });
+        }
+    }
+    let duration_ms = frames.last().map(|f| f.t_ms).unwrap_or(0.0);
+    let count = frames.len();
+    Ok(PlaybackDto {
+        frames,
+        duration_ms,
+        count,
+    })
+}
+
+#[tauri::command]
+pub fn export_task_json(id: String) -> Result<String, String> {
+    crate::tasks::compact_payload(&id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn export_task_jsonl(id: String) -> Result<String, String> {
+    crate::tasks::export_jsonl(&id).map_err(|e| e.to_string())
+}
+
 // ── Replay ───────────────────────────────────────────────────────────────────
 
 #[tauri::command]

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sai Recorder - Task Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#4d8eff",
+                      "on-error": "#690005",
+                      "inverse-surface": "#e1e2ec",
+                      "surface-container-high": "#272a31",
+                      "primary": "#adc6ff",
+                      "on-tertiary-fixed-variant": "#723600",
+                      "on-tertiary": "#502400",
+                      "secondary": "#ffb3ad",
+                      "surface-container-lowest": "#0b0e15",
+                      "surface-tint": "#adc6ff",
+                      "secondary-fixed": "#ffdad7",
+                      "on-secondary": "#68000a",
+                      "tertiary-fixed": "#ffdcc6",
+                      "on-tertiary-container": "#461f00",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed": "#410004",
+                      "on-tertiary-fixed": "#311400",
+                      "on-surface": "#e1e2ec",
+                      "surface-bright": "#363941",
+                      "on-primary-fixed": "#001a42",
+                      "tertiary-fixed-dim": "#ffb786",
+                      "surface": "#10131a",
+                      "surface-container": "#1d2027",
+                      "inverse-primary": "#005ac2",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-error-container": "#ffdad6",
+                      "inverse-on-surface": "#2e3038",
+                      "on-primary": "#002e6a",
+                      "surface-dim": "#10131a",
+                      "outline": "#8c909f",
+                      "tertiary-container": "#df7412",
+                      "on-background": "#e1e2ec",
+                      "on-primary-container": "#00285d",
+                      "outline-variant": "#424754",
+                      "secondary-fixed-dim": "#ffb3ad",
+                      "surface-container-highest": "#32353c",
+                      "on-surface-variant": "#c2c6d6",
+                      "surface-container-low": "#191b23",
+                      "error-container": "#93000a",
+                      "surface-variant": "#32353c",
+                      "on-primary-fixed-variant": "#004395",
+                      "primary-fixed": "#d8e2ff",
+                      "on-secondary-container": "#ffaea8",
+                      "secondary-container": "#a40217",
+                      "tertiary": "#ffb786",
+                      "background": "#10131a",
+                      "on-secondary-fixed-variant": "#930013"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "container_padding": "24px",
+                      "base": "4px",
+                      "sidebar_width": "260px",
+                      "sm": "8px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-xl": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "mono-label": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "mono-label": ["12px", {"lineHeight": "16px", "fontWeight": "450"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        
+        .card-hover-actions {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .recording-card:hover .card-hover-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .checkbox-custom {
+            appearance: none;
+            background-color: transparent;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 1px solid theme('colors.outline');
+            border-radius: 0.15em;
+            display: grid;
+            place-content: center;
+        }
+
+        .checkbox-custom::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em theme('colors.primary');
+            background-color: theme('colors.primary');
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .checkbox-custom:checked::before {
+            transform: scale(1);
+        }
+        
+        .checkbox-custom:checked {
+            border-color: theme('colors.primary');
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container dark:bg-surface-container/60 backdrop-blur-xl bg-surface-container/60 backdrop-blur-md border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 flex flex-col py-6 z-50">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="h-10 w-10 rounded-full overflow-hidden bg-surface-variant flex items-center justify-center border border-outline-variant/30 shrink-0">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A macro shot of a sleek, futuristic metallic sphere with glowing blue circuit lines on a dark obsidian background, conveying high-tech automation and precision data processing, studio lighting, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxCMqgSHrECubo9SGfGRORttXCfGtTiTnp_Hy5cpdwNvotg9MDcZDibb4pfFE_j1ynTd14lVouztv6lyLi2h-xMCkAyyxolm_5ImrRbL_skPEdI0ZHoGB21egednuNeDHrRauWl4RlJ2XWp0y2tA-l0LvVNUUkv0u0O3XpzYHiZX5adaVyaupGpmSN2ALsKXXQArV6AcUQRlnx2ArnNJnuJWarwm10cqidnSie6RFoH4dkx_ot9DtZXTgPdPDUx1xFZJF2QxqIREQ"/>
+</div>
+<div>
+<h1 class="text-headline-lg font-headline-lg font-bold text-primary dark:text-primary tracking-tight">Sai Recorder</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Automation Hub</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex flex-col gap-1 flex-1 px-2">
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Home</span>
+</a>
+<a class="text-primary dark:text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 flex items-center gap-3 transition-all hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-r-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder_copy</span>
+<span class="text-label-md font-label-md">Task Library</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-lg" href="#">
+<span class="material-symbols-outlined">play_circle</span>
+<span class="text-label-md font-label-md">Replay</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-lg" href="#">
+<span class="material-symbols-outlined">output</span>
+<span class="text-label-md font-label-md">Export</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-lg" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-label-md font-label-md">Insights</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 active:scale-95 transition-transform duration-150 ease-out rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<!-- CTA -->
+<div class="px-6 mt-auto">
+<button class="w-full bg-primary hover:bg-primary-fixed-dim text-on-primary font-label-md text-label-md py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95 transition-transform duration-150 ease-out">
+<span class="material-symbols-outlined">fiber_manual_record</span>
+                Start Recording
+            </button>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="ml-[260px] flex-1 flex flex-col w-[calc(100%-260px)] min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-8 docked full-width top-0 sticky z-40 bg-transparent bg-background/80 backdrop-blur-sm border-b border-outline-variant/10">
+<div class="flex-1 flex items-center gap-4">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-high border-none rounded-lg py-2 pl-10 pr-4 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary transition-shadow" placeholder="Search tasks, datasets, or workflows..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="flex items-center gap-2 bg-error/10 px-3 py-1.5 rounded-full border border-error/20">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-error font-bold tracking-wider">REC</span>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 p-8 overflow-y-auto">
+<!-- Header & Filters -->
+<div class="mb-8 flex flex-col gap-6">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-headline-xl font-headline-xl text-on-surface">Task Library</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Manage and export your recorded automation workflows.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">select_all</span>
+                            Select Multiple
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-highest rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            Filter
+                        </button>
+</div>
+</div>
+<!-- Filter Tags -->
+<div class="flex gap-2 flex-wrap">
+<button class="px-3 py-1.5 rounded-full bg-primary-container/20 border border-primary/30 text-primary text-label-sm font-label-sm flex items-center gap-1 hover:bg-primary-container/30 transition-colors">
+                        Automation
+                        <span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-variant transition-colors">
+                        Dataset
+                    </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-variant transition-colors">
+                        Today
+                    </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-variant transition-colors">
+                        Large Files
+                    </button>
+</div>
+</div>
+<!-- Bento Grid - Recording Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="recording-card group relative flex flex-col bg-surface-container dark:bg-surface-container/60 backdrop-blur-md rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md hover:border-outline-variant/50 transition-all duration-300">
+<div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<input class="checkbox-custom w-5 h-5" type="checkbox"/>
+</div>
+<!-- Thumbnail Area -->
+<div class="h-40 relative bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container/80 to-transparent z-10"></div>
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" data-alt="A blurred background showing a glowing neon wireframe grid on a dark blue screen, representing raw digital data extraction and workflow automation, deep shadows, bright cyan accents, cinematic wide shot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ja1EZDsyL0SnhGHx_jSWGaxUYjT0yEiOoO3US_hs2cep9HTOlVqqf0YlZf5wSyoZ-HH4xRAv6hFVqmHbObYC5pKf5gVr5LbFrfN8U2Y-mzQ6Nqd-34qNzlngvTLS33hwps_RQQQ3GND9oReAiT9_hV0FcYHek_g7N2QCStMH77HcjdzH_3QTpDpVrzKkjjNJAJyNJOQswxrZS_DakkC30N3jDrNjNyjpADduo9ZMdakSlwT8LXvlU4Ii-4AcpdHJKPQaFcP7pvw"/>
+<div class="absolute bottom-3 right-3 z-20 flex gap-2">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-mono-label font-mono-label border border-outline-variant/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 12:05
+                            </span>
+</div>
+<div class="absolute top-3 right-3 z-20">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-label-sm font-label-sm border border-outline-variant/30">
+                                Dataset
+                            </span>
+</div>
+</div>
+<!-- Content Area -->
+<div class="p-4 flex flex-col flex-1">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-1 truncate" title="CRM Data Entry Training">CRM Data Entry Training</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Recorded Today, 10:45 AM</p>
+<!-- Metadata Grid -->
+<div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-auto border-t border-outline-variant/20 pt-3">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">mouse</span> Actions
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">156</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">folder</span> Size
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">8.4 MB</span>
+</div>
+<div class="flex items-center justify-between col-span-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">compress</span> Compression
+                                </span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-[92%] h-full bg-primary"></div>
+</div>
+<span class="text-mono-label font-mono-label text-primary">92%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hover Actions Overlay -->
+<div class="card-hover-actions absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-surface-container-highest via-surface-container-highest/90 to-transparent flex justify-end gap-2 pt-12">
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Delete">
+<span class="material-symbols-outlined text-[20px] text-error">delete</span>
+</button>
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Export">
+<span class="material-symbols-outlined text-[20px]">output</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary rounded-lg text-label-md font-label-md transition-colors" title="Replay">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Replay
+                        </button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="recording-card group relative flex flex-col bg-surface-container dark:bg-surface-container/60 backdrop-blur-md rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md hover:border-outline-variant/50 transition-all duration-300">
+<div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<input class="checkbox-custom w-5 h-5" type="checkbox"/>
+</div>
+<div class="h-40 relative bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container/80 to-transparent z-10"></div>
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" data-alt="A sleek dark dashboard interface displaying abstract analytics charts and glowing orange data nodes, representing complex workflow tracking, modern minimalist aesthetic, soft dramatic lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ6011Ss7eHTnZE8xhgZL5bWUDo3O5jt_UF5ZNcwfqdZO1_kaOIAThDAeusd1gO_qxRbjbGvITvsgZaH4Yb6KPSMnzX2s2gVSh3PtFIaFfaQPX_Ih0fsyhUxph6H6x4n-BE97V6LrU_eRc8m2d4jDVLWswaqY3tN4sH69BE6K1eJKXuSqUxtVSyi6gIJCkkyYA1VXdpuQCvM6zFvPdbnXamOwNhhR7de7Ly3OEJJncg12K461fPNrZ_g_R9W-GVSk72oo3veRgKkM"/>
+<div class="absolute bottom-3 right-3 z-20 flex gap-2">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-mono-label font-mono-label border border-outline-variant/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 05:32
+                            </span>
+</div>
+<div class="absolute top-3 right-3 z-20">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-label-sm font-label-sm border border-outline-variant/30">
+                                Automation
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-1 truncate" title="Invoice Processing Flow">Invoice Processing Flow</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Recorded Yesterday, 02:15 PM</p>
+<div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-auto border-t border-outline-variant/20 pt-3">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">mouse</span> Actions
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">89</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">folder</span> Size
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">3.1 MB</span>
+</div>
+<div class="flex items-center justify-between col-span-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">compress</span> Compression
+                                </span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-[95%] h-full bg-primary"></div>
+</div>
+<span class="text-mono-label font-mono-label text-primary">95%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="card-hover-actions absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-surface-container-highest via-surface-container-highest/90 to-transparent flex justify-end gap-2 pt-12">
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Delete">
+<span class="material-symbols-outlined text-[20px] text-error">delete</span>
+</button>
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Export">
+<span class="material-symbols-outlined text-[20px]">output</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary rounded-lg text-label-md font-label-md transition-colors" title="Replay">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Replay
+                        </button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="recording-card group relative flex flex-col bg-surface-container dark:bg-surface-container/60 backdrop-blur-md rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md hover:border-outline-variant/50 transition-all duration-300">
+<div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<input class="checkbox-custom w-5 h-5" type="checkbox"/>
+</div>
+<div class="h-40 relative bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container/80 to-transparent z-10"></div>
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" data-alt="A close up of a stylized code editor interface rendered in 3D glassmorphism style, floating over a deep indigo background, representing script execution and automation testing, moody rim lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmZurAY9A7UllI_ZKY31JMpELPU3fi3lSluN-NTJ2LgpNhyT5xk5aPNuf9UWycj7ID7sFz_8IGmaB5Ftq-r-siZq3TENFy4YbhKmTp9MKsubk1KQ4ntKvLlYcYiGDJ2k58r1D_CN6uyE2xGHniWqyaqYhMsc9d2T0iDOJ53rHk_jGQ9mG5e2XltM-MC_b0gTV_57msw8EC0Z9SqXLYQiBUmJGRFU4M9X_Qf4IMZdVDI1bB31QpEaf0ivkc2HKy1KnRL6bKDiK4rTQ"/>
+<div class="absolute bottom-3 right-3 z-20 flex gap-2">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-mono-label font-mono-label border border-outline-variant/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 24:10
+                            </span>
+</div>
+<div class="absolute top-3 right-3 z-20">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-label-sm font-label-sm border border-outline-variant/30">
+                                Testing
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-1 truncate" title="E2E Login Sequence">E2E Login Sequence</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Recorded Oct 12, 09:30 AM</p>
+<div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-auto border-t border-outline-variant/20 pt-3">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">mouse</span> Actions
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">342</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">folder</span> Size
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">15.2 MB</span>
+</div>
+<div class="flex items-center justify-between col-span-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">compress</span> Compression
+                                </span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-[88%] h-full bg-primary"></div>
+</div>
+<span class="text-mono-label font-mono-label text-primary">88%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="card-hover-actions absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-surface-container-highest via-surface-container-highest/90 to-transparent flex justify-end gap-2 pt-12">
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Delete">
+<span class="material-symbols-outlined text-[20px] text-error">delete</span>
+</button>
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Export">
+<span class="material-symbols-outlined text-[20px]">output</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary rounded-lg text-label-md font-label-md transition-colors" title="Replay">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Replay
+                        </button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="recording-card group relative flex flex-col bg-surface-container dark:bg-surface-container/60 backdrop-blur-md rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md hover:border-outline-variant/50 transition-all duration-300">
+<div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<input class="checkbox-custom w-5 h-5" type="checkbox"/>
+</div>
+<div class="h-40 relative bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container/80 to-transparent z-10"></div>
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" data-alt="A visual representation of data scraping, showing cascading vertical streams of digital characters in muted greys and soft blue glowing nodes, set in a deep space-like dark interface, high tech." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWi4HDEkuT5tkarIVFn9AgFykwRuMM7EE9NQ-LyI8jSf20YYuwXocXcJg6IFFK5fj4Dz56ARg6lXzxYv8KP24MuEdqBIprmDXB9Il3qOCLHuBcEqBMB9UVrZc8Z63rwcAflmY4J10srRX9xzGlateaA04ia3KVlXPjRm-UV_Zg6dsSUndtV_Wu2yCfjnUXa7t_OOcj2UC_2PeEA76vUDbhFXwp7s3i96X8LghpSzQSi3HkQXqS8AZb8Q936ASfHiiEujZ5qU7tP1w"/>
+<div class="absolute bottom-3 right-3 z-20 flex gap-2">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-mono-label font-mono-label border border-outline-variant/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 08:45
+                            </span>
+</div>
+<div class="absolute top-3 right-3 z-20">
+<span class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface px-2 py-0.5 rounded text-label-sm font-label-sm border border-outline-variant/30">
+                                Automation
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-1 truncate" title="Daily Report Gen">Daily Report Gen</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Recorded Oct 10, 04:00 PM</p>
+<div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-auto border-t border-outline-variant/20 pt-3">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">mouse</span> Actions
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">112</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">folder</span> Size
+                                </span>
+<span class="text-mono-label font-mono-label text-on-surface">5.6 MB</span>
+</div>
+<div class="flex items-center justify-between col-span-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">compress</span> Compression
+                                </span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-[94%] h-full bg-primary"></div>
+</div>
+<span class="text-mono-label font-mono-label text-primary">94%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="card-hover-actions absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-surface-container-highest via-surface-container-highest/90 to-transparent flex justify-end gap-2 pt-12">
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Delete">
+<span class="material-symbols-outlined text-[20px] text-error">delete</span>
+</button>
+<button class="p-2 bg-surface-variant hover:bg-surface-bright text-on-surface rounded-lg transition-colors border border-outline-variant/30" title="Export">
+<span class="material-symbols-outlined text-[20px]">output</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary rounded-lg text-label-md font-label-md transition-colors" title="Replay">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                            Replay
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Task Library -->

@@ -1,87 +1,242 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sai Recorder</title>
-  <link rel="stylesheet" href="styles.css" />
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sai Recorder - Onboarding</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "secondary": "#ffb3ad",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#ffdad7",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#461f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#410004",
+                        "on-tertiary-fixed": "#311400",
+                        "on-surface": "#e1e2ec",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface": "#10131a",
+                        "surface-container": "#1d2027",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3038",
+                        "on-primary": "#002e6a",
+                        "surface-dim": "#10131a",
+                        "outline": "#8c909f",
+                        "tertiary-container": "#df7412",
+                        "on-background": "#e1e2ec",
+                        "on-primary-container": "#00285d",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "surface-container-highest": "#32353c",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container-low": "#191b23",
+                        "error-container": "#93000a",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-container": "#a40217",
+                        "tertiary": "#ffb786",
+                        "background": "#10131a",
+                        "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "container_padding": "24px",
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "mono-label": ["12px", { "lineHeight": "16px", "fontWeight": "450" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom utilities for precise styling not easily handled by pure Tailwind tokens */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6); /* surface-container equivalent with opacity */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .option-card.selected {
+            border-color: theme('colors.primary');
+            background: rgba(77, 142, 255, 0.05); /* very subtle primary tint */
+        }
+        
+        .option-card.selected .check-indicator {
+            background-color: theme('colors.primary');
+            border-color: theme('colors.primary');
+        }
+        
+        .option-card.selected .check-icon {
+            opacity: 1;
+        }
+
+        .option-card.selected .icon-container {
+            color: theme('colors.primary');
+            background: theme('colors.primary-container' / 20%);
+        }
+    </style>
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">●</span>
-      <div>
-        <h1>Sai Recorder</h1>
-        <p class="sub">Record workflows · compress · replay</p>
-      </div>
-    </div>
-    <div id="recIndicator" class="rec-indicator hidden">
-      <span class="dot"></span> Recording…
-    </div>
-  </header>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-md overflow-hidden relative selection:bg-primary-container selection:text-on-primary-container">
+<!-- Atmospheric background elements (Subtle) -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary-container/5 blur-[150px]"></div>
+</div>
+<!-- Main Content Canvas (Navigation explicitly suppressed for Onboarding/Transactional flow) -->
+<main class="w-full max-w-[800px] animate-[fadeIn_0.5s_ease-out]">
+<!-- Core Onboarding Card -->
+<div class="glass-panel rounded-[24px] border border-outline-variant/30 shadow-2xl shadow-surface-container-lowest/80 p-[48px] flex flex-col gap-xl">
+<!-- Header Section -->
+<header class="text-center flex flex-col items-center gap-md">
+<div class="w-16 h-16 rounded-2xl bg-surface-variant/50 border border-outline-variant/20 flex items-center justify-center shadow-inner mb-sm">
+<span class="material-symbols-outlined text-[32px] text-primary" style="font-variation-settings: 'FILL' 1;">
+                        auto_awesome
+                    </span>
+</div>
+<div class="space-y-sm">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Welcome to Sai Recorder</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[500px] mx-auto">Choose your primary workflow to get started.</p>
+</div>
+</header>
+<!-- Workflow Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-sm" id="workflow-selection">
+<!-- Card 1: Automate -->
+<button class="option-card text-left relative p-lg rounded-xl bg-surface border-2 border-outline-variant/30 hover:border-outline transition-all duration-300 flex flex-col gap-lg group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" type="button">
+<div class="flex justify-between items-start w-full">
+<div class="icon-container w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors duration-300">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">
+                                smart_toy
+                            </span>
+</div>
+<div class="check-indicator w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors duration-300">
+<span class="check-icon material-symbols-outlined text-[14px] text-on-primary opacity-0 transition-opacity duration-300 font-bold">
+                                check
+                            </span>
+</div>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">Automate a workflow</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Record repetitive tasks to replay or hand off to an AI agent.</p>
+</div>
+</button>
+<!-- Card 2: Collect Data -->
+<button class="option-card text-left relative p-lg rounded-xl bg-surface border-2 border-outline-variant/30 hover:border-outline transition-all duration-300 flex flex-col gap-lg group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" type="button">
+<div class="flex justify-between items-start w-full">
+<div class="icon-container w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors duration-300">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">
+                                dataset
+                            </span>
+</div>
+<div class="check-indicator w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors duration-300">
+<span class="check-icon material-symbols-outlined text-[14px] text-on-primary opacity-0 transition-opacity duration-300 font-bold">
+                                check
+                            </span>
+</div>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">Collect demonstration data</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Generate high-quality trajectories for ML research and dataset collection.</p>
+</div>
+</button>
+</div>
+<!-- Action Area -->
+<div class="flex justify-end pt-lg mt-md border-t border-outline-variant/20">
+<button class="px-[32px] py-[12px] rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md transition-all duration-300 flex items-center gap-sm cursor-not-allowed opacity-70" disabled="" id="continue-btn">
+                    Continue
+                    <span class="material-symbols-outlined text-[18px]">
+                        arrow_forward
+                    </span>
+</button>
+</div>
+</div>
+</main>
+<!-- Inline script for micro-interactions (Selection Logic) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.option-card');
+            const continueBtn = document.getElementById('continue-btn');
 
-  <main>
-    <section class="panel">
-      <h2>New recording</h2>
-      <div class="options">
-        <label>Mode
-          <select id="mode">
-            <option value="sai">Sai (inline)</option>
-            <option value="dataset">Dataset (JSONL)</option>
-          </select>
-        </label>
-        <label>FPS
-          <input id="fps" type="number" min="1" max="60" value="10" />
-        </label>
-        <label>History (s)
-          <input id="history" type="number" min="1" max="60" value="10" />
-        </label>
-        <label>Max dim (px)
-          <input id="maxDim" type="number" min="0" placeholder="off" />
-        </label>
-        <label class="check"><input id="crop" type="checkbox" /> Crop to focus</label>
-        <label class="check"><input id="lossy" type="checkbox" /> Lossy JPEG</label>
-        <label>Quality
-          <input id="quality" type="number" min="1" max="100" value="80" />
-        </label>
-      </div>
-      <div class="actions-row">
-        <button id="startBtn" class="primary">● Start Recording</button>
-        <button id="stopBtn" class="danger hidden">■ Stop Recording</button>
-        <span id="hint" class="hint">A floating Stop control will appear on screen.</span>
-      </div>
-    </section>
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Deselect all
+                    cards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Select clicked
+                    card.classList.add('selected');
+                    
+                    // Enable Continue button with Primary styling
+                    continueBtn.disabled = false;
+                    continueBtn.classList.remove('bg-surface-variant', 'text-on-surface-variant', 'cursor-not-allowed', 'opacity-70');
+                    continueBtn.classList.add('bg-primary', 'text-on-primary', 'hover:bg-primary-fixed', 'hover:shadow-[0_0_20px_rgba(173,198,255,0.3)]', 'cursor-pointer', 'opacity-100');
+                });
+            });
+        });
+    </script>
 
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Task library</h2>
-        <button id="refreshBtn" class="ghost">Refresh</button>
-      </div>
-      <div id="taskList" class="task-list"></div>
-      <p id="emptyTasks" class="empty hidden">No recordings yet.</p>
-    </section>
-  </main>
+  <script src="app.js"></script>
+</body></html>
 
-  <!-- Detail modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="modalTitle">Task</h3>
-        <button id="modalClose" class="ghost">✕</button>
-      </div>
-      <div id="modalMeta" class="modal-meta"></div>
-      <pre id="modalPreview" class="preview"></pre>
-    </div>
-  </div>
-
-  <!-- Replay overlay -->
-  <div id="replayOverlay" class="replay-overlay hidden">
-    <div id="replayBig" class="replay-big">3</div>
-    <div id="replayMsg" class="replay-msg"></div>
-  </div>
-
-  <div id="toast" class="toast hidden"></div>
-
-  <script src="main.js"></script>
-</body>
-</html>
+<!-- Onboarding -->

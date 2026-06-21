@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sai Recorder - Home Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "secondary": "#ffb3ad",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#ffdad7",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#461f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#410004",
+                        "on-tertiary-fixed": "#311400",
+                        "on-surface": "#e1e2ec",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface": "#10131a",
+                        "surface-container": "#1d2027",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3038",
+                        "on-primary": "#002e6a",
+                        "surface-dim": "#10131a",
+                        "outline": "#8c909f",
+                        "tertiary-container": "#df7412",
+                        "on-background": "#e1e2ec",
+                        "on-primary-container": "#00285d",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "surface-container-highest": "#32353c",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container-low": "#191b23",
+                        "error-container": "#93000a",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-container": "#a40217",
+                        "tertiary": "#ffb786",
+                        "background": "#10131a",
+                        "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "container_padding": "24px",
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "mono-label": ["12px", {"lineHeight": "16px", "fontWeight": "450"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-glow {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 12px 0 rgba(255, 180, 171, 0.4);
+                opacity: 1;
+            }
+            50% {
+                box-shadow: 0 0 24px 4px rgba(255, 180, 171, 0.6);
+                opacity: .8;
+            }
+        }
+        
+        .glass-panel {
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-row-hover:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md text-body-md overflow-x-hidden flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar -->
+<nav class="hidden md:flex fixed left-0 top-0 h-screen w-[260px] bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 flex-col py-6 z-50">
+<!-- Brand Header -->
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">videocam</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary tracking-tight">Sai Recorder</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Automation Hub</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-1 flex-1">
+<a class="text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Home</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="folder_copy">folder_copy</span>
+<span class="text-label-md font-label-md">Task Library</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="text-label-md font-label-md">Replay</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="output">output</span>
+<span class="text-label-md font-label-md">Export</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-label-md font-label-md">Insights</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 hover:text-on-surface transition-all duration-200 active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<!-- Bottom CTA -->
+<div class="px-4 mt-auto">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">fiber_manual_record</span>
+                Start Recording
+            </button>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="hidden md:flex justify-between items-center h-16 px-8 sticky top-0 z-40 bg-background/80 backdrop-blur-sm w-full transition-all">
+<div class="flex-1">
+<!-- Search could go here if left aligned, but spec says on_right -->
+</div>
+<div class="flex items-center gap-4">
+<!-- Search Bar -->
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="bg-surface-container text-on-surface text-body-sm font-body-sm rounded-full py-1.5 pl-9 pr-4 w-64 border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" placeholder="Search recordings..." type="text"/>
+</div>
+<!-- Actions -->
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant/30 mx-2"></div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-error/10 text-error hover:bg-error/20 transition-colors border border-error/20">
+<div class="w-2 h-2 rounded-full bg-error pulse-glow"></div>
+<span class="text-label-sm font-label-sm font-bold tracking-wider">REC</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full ml-2 border border-outline-variant/50 object-cover" data-alt="A macro shot of a sleek, dark metallic surface with subtle blue LED accent lighting, representing a modern technology interface. The lighting is low-key, moody, and highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoNYRuKXAbzJSu-Vpky76tfneXpnMOC6pjPtRG08U4fz-OLTOXtwjCjGz-InPo4wlhyrjULhpcjMYdkkhZwFLX7OIcrR0XZpiUxuUZaGcNUFv553DRUe3A0BqHjPQyeGq4DY4i2XHO0Fv0lO-oAmiUSHzGCsLPg1KyVq1GdZFGfAXwHsko9FUWVQvMdXve-Kfav4AoCQ0_Jii7H_doaGgS_GgvFoe8KLuLR-cV-XIFytMkLassBcfnE3IJvDKiqeBLjZT6pqy0OJQ"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-6 md:p-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
+<!-- Hero Section -->
+<section class="glass-panel rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center min-h-[320px] text-center border border-outline-variant/20 shadow-lg shadow-surface-container-lowest/30">
+<!-- Background Pattern/Effect -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at center, #adc6ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+<div class="absolute -top-32 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center gap-6 max-w-2xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.6)]"></div>
+                        System Ready
+                    </div>
+<h2 class="text-headline-xl font-headline-xl text-on-surface">Start a new automation trace</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Record your workflow. Sai will automatically capture semantic intent, DOM state, and network calls.</p>
+<button class="mt-4 group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-on-primary rounded-xl text-headline-md font-headline-md hover:bg-primary-container transition-all active:scale-95 shadow-[0_0_20px_rgba(77,142,255,0.3)] hover:shadow-[0_0_30px_rgba(77,142,255,0.5)]">
+<span class="material-symbols-outlined text-[28px] group-hover:text-error transition-colors" data-weight="fill" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                        Start Recording
+                    </button>
+</div>
+</section>
+<!-- Stats Summary Row -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">video_library</span>
+<span class="text-label-md font-label-md uppercase tracking-wider">Total Recordings</span>
+</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">124</div>
+</div>
+<div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+<span class="text-label-md font-label-md uppercase tracking-wider">Time Captured</span>
+</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">42h <span class="text-headline-md text-on-surface-variant">15m</span></div>
+</div>
+<div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">data_usage</span>
+<span class="text-label-md font-label-md uppercase tracking-wider">Tokens Saved</span>
+</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">1.2M</div>
+</div>
+<div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">compress</span>
+<span class="text-label-md font-label-md uppercase tracking-wider">Avg Compression</span>
+</div>
+<div class="text-headline-lg font-headline-lg text-on-surface text-tertiary">85%</div>
+</div>
+</section>
+<!-- Recent Activity Table -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="text-headline-md font-headline-md text-on-surface">Recent Activity</h3>
+<button class="text-primary text-label-md font-label-md hover:underline flex items-center gap-1">
+                        View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="glass-panel rounded-xl border border-outline-variant/20 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 bg-surface-container/30">
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[100px]">Preview</th>
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Name</th>
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[120px]">Duration</th>
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[100px]">Actions</th>
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[100px]">Size</th>
+<th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[80px] text-right">Play</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md divide-y divide-outline-variant/10">
+<tr class="table-row-hover transition-colors group">
+<td class="py-3 px-4">
+<div class="w-16 h-10 rounded bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A tiny, low-resolution thumbnail image showing a dark mode code editor interface with syntax highlighting, very subtle and abstract." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvRoOFvNKcQBphgsfvF-qHddyLz9llubbFMbQ0OuyLlVWRTzygF39naV0xNQ56tN3IwlnATiSy5HvakGfyyuVKP14wOi4yLtGYJrHpmQQh9tHNM7Cf108kN_k6DdEbYHB2zLdPYYYDbp7OF5R_Oa3wTLOGvntKxPFPWPNvv_IHKdNZQsiMtq4MzXVEQikqjslzfQDXjI5M7liQ-PznXKZNQkqinPX8aHe--oPrvFZ9FFKSyDsDGqm6lzYgbD1my6gNQYF6yMgdjpA"/>
+</div>
+</td>
+<td class="py-3 px-4 font-medium text-on-surface">GitHub PR Review Workflow</td>
+<td class="py-3 px-4 text-on-surface-variant font-mono-label">2m 45s</td>
+<td class="py-3 px-4 text-on-surface-variant">42 steps</td>
+<td class="py-3 px-4 text-on-surface-variant">1.2 MB</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/20 hover:scale-110 ml-auto">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</td>
+</tr>
+<tr class="table-row-hover transition-colors group">
+<td class="py-3 px-4">
+<div class="w-16 h-10 rounded bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A tiny, low-resolution thumbnail image showing a generic SaaS dashboard with a line chart, dark mode, abstract and muted." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrK7OzQZ0HGNHDyX6WNGVE2EDPfRAy-i_RSlDyKkgEvjXmtopw-lpUY34ZJ8bEKadNcafu5usuqXecrgn4kX0yeBcc9Bs6TrQXL69h9wX-kpa73dNK3JDce9Fv9So_ZJAn1AZlmFNrW2y47PyZIS8OLVx4lVriqP153vATmqtI7NRlgFsXeOzGoNdPEL4ZukCOP6k8ExQksMSAHbLGQ1pbhPKiwzi8vSiJsXghPQLsW2YVXZaqzHaekBlt-fNpVr6fsY_rTg5LFn8"/>
+</div>
+</td>
+<td class="py-3 px-4 font-medium text-on-surface">Data Extraction - Acme Corp CRM</td>
+<td class="py-3 px-4 text-on-surface-variant font-mono-label">15m 20s</td>
+<td class="py-3 px-4 text-on-surface-variant">156 steps</td>
+<td class="py-3 px-4 text-on-surface-variant">4.8 MB</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/20 hover:scale-110 ml-auto">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</td>
+</tr>
+<tr class="table-row-hover transition-colors group">
+<td class="py-3 px-4">
+<div class="w-16 h-10 rounded bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A tiny, low-resolution thumbnail image showing a web form filling process, abstract blocks representing input fields in dark mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEvltADuNsQRHFqFzh2OQw79Dj3UJwhJdL6lgdYaxrZPdV5Rix2BUL3G-2kp9rinRoy9PGSwbDuWlvnSLMrpdwq6f3QBU0dSICLu6XPK0GyvBbFFjAfHVmPcTM0Uhqnrqm-8B60bQvaS8CTQ7wYrv-WvoDTUxF_9wA7fure_pvri44Yz3T-tVQ0112maLQcwBE1Kd4TZPpovtHrGYJJfPqp9j1lY1qzVc-jcvYsH6yHfmQGq98eap3WxBPEIoCz-UR_aFAW6JHZVM"/>
+</div>
+</td>
+<td class="py-3 px-4 font-medium text-on-surface">Monthly Report Generation</td>
+<td class="py-3 px-4 text-on-surface-variant font-mono-label">5m 12s</td>
+<td class="py-3 px-4 text-on-surface-variant">89 steps</td>
+<td class="py-3 px-4 text-on-surface-variant">2.1 MB</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/20 hover:scale-110 ml-auto">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+</div>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Dashboard -->

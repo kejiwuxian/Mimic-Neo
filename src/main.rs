@@ -48,6 +48,9 @@ fn main() {
             commands::run_task,
             commands::get_telegram_status,
             commands::send_task_telegram,
+            commands::get_task_playback,
+            commands::export_task_json,
+            commands::export_task_jsonl,
         ])
         .run(tauri::generate_context!())
         .expect("error while running sai-recorder");

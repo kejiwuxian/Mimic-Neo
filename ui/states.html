@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Empty &amp; Error States - Sai Recorder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#4d8eff",
+                      "on-error": "#690005",
+                      "inverse-surface": "#e1e2ec",
+                      "surface-container-high": "#272a31",
+                      "primary": "#adc6ff",
+                      "on-tertiary-fixed-variant": "#723600",
+                      "on-tertiary": "#502400",
+                      "secondary": "#ffb3ad",
+                      "surface-container-lowest": "#0b0e15",
+                      "surface-tint": "#adc6ff",
+                      "secondary-fixed": "#ffdad7",
+                      "on-secondary": "#68000a",
+                      "tertiary-fixed": "#ffdcc6",
+                      "on-tertiary-container": "#461f00",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed": "#410004",
+                      "on-tertiary-fixed": "#311400",
+                      "on-surface": "#e1e2ec",
+                      "surface-bright": "#363941",
+                      "on-primary-fixed": "#001a42",
+                      "tertiary-fixed-dim": "#ffb786",
+                      "surface": "#10131a",
+                      "surface-container": "#1d2027",
+                      "inverse-primary": "#005ac2",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-error-container": "#ffdad6",
+                      "inverse-on-surface": "#2e3038",
+                      "on-primary": "#002e6a",
+                      "surface-dim": "#10131a",
+                      "outline": "#8c909f",
+                      "tertiary-container": "#df7412",
+                      "on-background": "#e1e2ec",
+                      "on-primary-container": "#00285d",
+                      "outline-variant": "#424754",
+                      "secondary-fixed-dim": "#ffb3ad",
+                      "surface-container-highest": "#32353c",
+                      "on-surface-variant": "#c2c6d6",
+                      "surface-container-low": "#191b23",
+                      "error-container": "#93000a",
+                      "surface-variant": "#32353c",
+                      "on-primary-fixed-variant": "#004395",
+                      "primary-fixed": "#d8e2ff",
+                      "on-secondary-container": "#ffaea8",
+                      "secondary-container": "#a40217",
+                      "tertiary": "#ffb786",
+                      "background": "#10131a",
+                      "on-secondary-fixed-variant": "#930013"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "container_padding": "24px",
+                      "base": "4px",
+                      "sidebar_width": "260px",
+                      "sm": "8px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-xl": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "mono-label": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "mono-label": ["12px", {"lineHeight": "16px", "fontWeight": "450"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-lg overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center h-16 px-8 ml-[260px] w-[calc(100%-260px)] bg-transparent docked full-width top-0 sticky z-40 bg-background/80 backdrop-blur-sm hidden md:flex">
+<div class="hidden">Sai Recorder</div>
+<div class="flex-1 flex justify-end"></div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant font-medium hover:text-primary transition-colors cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/20">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant font-medium hover:text-primary transition-colors cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/20">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-full font-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors ml-4">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(255,180,171,0.6)]"></span>
+                REC
+            </button>
+</div>
+</header>
+<!-- Side Nav Bar -->
+<nav class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container dark:bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 hidden md:flex flex-col py-6 z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined font-bold">movie</span>
+</div>
+<div>
+<h1 class="text-headline-lg font-headline-lg font-bold text-primary dark:text-primary tracking-tight">Sai Recorder</h1>
+<div class="text-label-sm text-on-surface-variant">Automation Hub</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-2 space-y-1">
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Home</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="folder_copy">folder_copy</span>
+<span class="text-label-md font-label-md">Task Library</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="text-label-md font-label-md">Replay</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="output">output</span>
+<span class="text-label-md font-label-md">Export</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface transition-colors hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-label-md font-label-md">Insights</span>
+</a>
+<a class="text-primary dark:text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 flex items-center gap-3 transition-all rounded-r-lg active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<div class="px-6 mt-auto">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">radio_button_checked</span>
+                Start Recording
+            </button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="md:ml-[260px] p-container_padding pt-4 min-h-[calc(100vh-64px)]">
+<div class="mb-8">
+<h2 class="text-headline-xl font-headline-xl text-on-background">System States</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2 max-w-2xl">
+                Examples of empty and error states within the recording interface, designed to provide clear guidance and quick recovery paths.
+            </p>
+</div>
+<!-- Split View Container -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Empty State Card -->
+<div class="bg-surface-container/60 backdrop-blur-xl border border-outline-variant/20 rounded-xl p-8 flex flex-col items-center justify-center min-h-[500px] shadow-lg shadow-surface-container-lowest/30 relative overflow-hidden group">
+<!-- Subtle background decoration -->
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="w-32 h-32 mb-6 text-outline opacity-60 group-hover:text-primary group-hover:opacity-80 transition-all duration-500 transform group-hover:-translate-y-2">
+<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24">
+<rect height="16" rx="2" ry="2" width="20" x="2" y="4"></rect>
+<circle cx="8" cy="12" r="2"></circle>
+<circle cx="16" cy="12" r="2"></circle>
+<path d="M10 12h4"></path>
+<path d="M2 8h20"></path>
+<path d="M2 16h20"></path>
+</svg>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-2">No recordings yet</h3>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-sm mb-8">
+                        Your workspace is currently empty. Start a new recording session to begin capturing interactions and building your task library.
+                    </p>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                        Start Your First Recording
+                    </button>
+</div>
+</div>
+<!-- Error State Card -->
+<div class="bg-surface-container/60 backdrop-blur-xl border border-error/20 rounded-xl p-8 flex flex-col items-center justify-center min-h-[500px] shadow-lg shadow-error/5 relative overflow-hidden">
+<!-- Subtle background decoration -->
+<div class="absolute inset-0 bg-gradient-to-br from-error/5 to-transparent opacity-50"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-error/10 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="w-24 h-24 mb-6 rounded-full bg-error-container/30 flex items-center justify-center border border-error/30 shadow-[0_0_30px_rgba(255,180,171,0.1)]">
+<span class="material-symbols-outlined text-[48px] text-error" data-icon="warning" data-weight="fill" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-2">Capture failed</h3>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-sm mb-8">
+                        An error occurred while saving the trajectory. The recording engine unexpectedly terminated the connection before the final frames could be synchronized.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+<button class="bg-error text-on-error px-6 py-3 rounded-lg font-label-md hover:bg-error/80 transition-all active:scale-95 shadow-lg shadow-error/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+                            Retry Capture
+                        </button>
+<button class="bg-transparent border border-outline-variant text-on-surface px-6 py-3 rounded-lg font-label-md hover:bg-surface-variant hover:text-on-surface hover:border-outline transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+                            View Error Log
+                        </button>
+</div>
+</div>
+<!-- Mock Error Log Snippet (Visual detail) -->
+<div class="absolute bottom-0 left-0 w-full p-4 border-t border-outline-variant/10 bg-surface-container-highest/50 font-mono-label text-mono-label text-on-surface-variant/70 text-xs truncate">
+                    &gt; ERR_TRAJECTORY_SYNC: Timeout waiting for stream 0x4A2...
+                </div>
+</div>
+</div>
+</main>
+
+  <script src="app.js"></script>
+</body></html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sai Recorder - Task Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "secondary": "#ffb3ad",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#ffdad7",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#461f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#410004",
+                        "on-tertiary-fixed": "#311400",
+                        "on-surface": "#e1e2ec",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface": "#10131a",
+                        "surface-container": "#1d2027",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3038",
+                        "on-primary": "#002e6a",
+                        "surface-dim": "#10131a",
+                        "outline": "#8c909f",
+                        "tertiary-container": "#df7412",
+                        "on-background": "#e1e2ec",
+                        "on-primary-container": "#00285d",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "surface-container-highest": "#32353c",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container-low": "#191b23",
+                        "error-container": "#93000a",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-container": "#a40217",
+                        "tertiary": "#ffb786",
+                        "background": "#10131a",
+                        "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "container_padding": "24px",
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "mono-label": ["12px", { "lineHeight": "16px", "fontWeight": "450" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(30, 41, 59, 0.2) 100%);
+            backdrop-filter: blur(20px);
+        }
+        .scrubber-thumb {
+            box-shadow: 0 0 12px 2px rgba(173, 198, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-lg h-screen overflow-hidden flex">
+<!-- SideNavBar Shared Component -->
+<nav class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container dark:bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 flex flex-col py-6 z-50">
+<div class="px-6 mb-8 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+<img class="w-full h-full rounded-full object-cover" data-alt="A clean, minimalist 3D rendering of an abstract geometric orb, utilizing shades of deep blue and crisp white, symbolizing an automated digital assistant. Professional, modern corporate aesthetic. High resolution, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJT7Bk4ytdgxoAekQ8ruqTINh0mCc039yAceHyuGh4oxCGlAKkOwAF8cJg_pI33YnHzLYbkAFQDmbCjZw2wSIECfiZc6ETByOirQYgEvtPhICRlJmkQsnqGiWdZDEBRftVEpb1mNvJfGwwSEz318wqECVjwlJQD_UXWvs85cDCwgxM-Rmxcp1RLTh86QGh1wHMK__9dyVbLRpy3RuCJsavundPWmnap2QVft3keLm2J9X65FPHtMCM8dSdLDqoJUAULI_HtVTUkSo"/>
+</div>
+<div>
+<div class="text-headline-lg font-headline-lg font-bold text-primary dark:text-primary tracking-tight">Sai Recorder</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Automation Hub</div>
+</div>
+</div>
+</div>
+<div class="flex-1 px-2 space-y-1">
+<!-- Home -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 hover:text-on-surface transition-colors rounded-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Home
+            </a>
+<!-- Task Library (Active) -->
+<a class="text-primary dark:text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all rounded-r-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder_copy</span>
+                Task Library
+            </a>
+<!-- Replay -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 hover:text-on-surface transition-colors rounded-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined">play_circle</span>
+                Replay
+            </a>
+<!-- Export -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 hover:text-on-surface transition-colors rounded-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined">output</span>
+                Export
+            </a>
+<!-- Insights -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 hover:text-on-surface transition-colors rounded-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined">insights</span>
+                Insights
+            </a>
+<!-- Settings -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 hover:text-on-surface transition-colors rounded-lg active:scale-95 transition-transform duration-150 ease-out text-label-md font-label-md mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</div>
+<div class="px-6 mt-6">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg text-label-md font-label-md font-bold hover:opacity-90 transition-opacity flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">fiber_manual_record</span>
+                Start Recording
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="ml-[260px] flex-1 flex flex-col h-screen w-[calc(100%-260px)] relative">
+<!-- TopAppBar Shared Component -->
+<header class="flex justify-between items-center h-16 px-8 bg-background/80 backdrop-blur-sm docked full-width top-0 sticky z-40 shrink-0 border-b border-transparent">
+<!-- Hidden brand logo as per JSON -->
+<div class="hidden text-primary dark:text-primary">Sai Recorder</div>
+<div class="flex-1 flex justify-center invisible">
+<!-- Center aligned gap -->
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">help</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-error/10 border border-error/20 text-error text-label-md font-label-md shadow-[0_0_12px_rgba(255,180,171,0.15)] cursor-pointer hover:bg-error/20 transition-all">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                    REC
+                </div>
+</div>
+</header>
+<!-- Editor Canvas -->
+<main class="flex-1 p-container_padding flex flex-col gap-lg min-h-0">
+<!-- Task Header Context -->
+<div class="shrink-0 flex justify-between items-end border-b border-outline-variant/20 pb-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<span class="px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Draft</span>
+<span class="text-body-sm font-body-sm text-outline">Last saved 2m ago</span>
+</div>
+<h1 class="text-headline-xl font-headline-xl text-on-surface tracking-tight">User Authentication Flow</h1>
+<div class="flex gap-6 mt-3 text-body-md font-body-md text-on-surface-variant">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">timer</span> 01:45 Total Runtime</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">list_alt</span> 42 Captured Steps</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">desktop_windows</span> Desktop 1920x1080</span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">undo</span> Discard Changes
+                    </button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">save</span> Save Timeline
+                    </button>
+</div>
+</div>
+<!-- Split Layout Editor -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-gutter min-h-0 pb-6">
+<!-- Left Column: Keyframe Player -->
+<div class="flex flex-col bg-surface-container rounded-xl border border-outline-variant/30 overflow-hidden shadow-2xl shadow-black/40 min-h-0">
+<!-- Top Bar of Player -->
+<div class="h-10 bg-surface-container-highest border-b border-outline-variant/20 flex items-center justify-between px-4 shrink-0">
+<div class="text-label-md font-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                            Keyframe Viewer
+                        </div>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant hover:text-on-surface cursor-pointer">zoom_in</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant hover:text-on-surface cursor-pointer">zoom_out</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant hover:text-on-surface cursor-pointer ml-2">fit_screen</span>
+</div>
+</div>
+<!-- Image Display Area -->
+<div class="flex-1 relative bg-[#0b0e15] overflow-hidden flex items-center justify-center p-4">
+<!-- Simulated application screenshot -->
+<div class="relative w-full max-w-4xl aspect-video rounded border border-outline-variant/20 shadow-2xl bg-center bg-cover" data-alt="A detailed user interface of a modern SaaS web application in dark mode. The screen shows a sophisticated login page centered on a sleek, slate-gray canvas. The typography is sharp. A distinct, bright primary-blue 'Sign In' button is visible. High tech, precise, corporate mood with soft studio lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9oRZ96HFqkimzLxhzfiZhecW5qKNwNLtcaapZ1KwjuBZ3VShphUlKj4KlYUdZb2PnUwKJDNDV3k4WA9bzlnRp1G9gHs04oDJ7OKw2ivrcdkPgyYriSxiW0S8UHex24qkfwdEF6-FR8nv5_2mInr-eb2j6kD42eq1Yhx8xsCZ52w18M9d8poAMRMHMbDn0ALTekdtwnWGm579YSqyfsN1CIFY-ErUyu9sgydlsaPp1bJeqjmQGyX0VKnqPnw6F9HtDBYw-sS2QWkQ')">
+<!-- Highlight Bounding Box -->
+<div class="absolute top-[52%] left-[40%] w-[20%] h-[12%] border-2 border-primary bg-primary/20 flex items-end justify-end p-1 shadow-[0_0_15px_rgba(173,198,255,0.3)]">
+<span class="text-[10px] font-mono-label bg-primary text-on-primary px-1 rounded-sm leading-none py-0.5 shadow-sm">target_node</span>
+</div>
+<!-- Mouse cursor indicator -->
+<span class="material-symbols-outlined absolute top-[58%] left-[45%] text-on-surface drop-shadow-md text-[24px] pointer-events-none" style="font-variation-settings: 'FILL' 1;">arrow_selector_tool</span>
+</div>
+</div>
+<!-- Player Controls -->
+<div class="bg-surface-container-high border-t border-outline-variant/20 p-5 flex flex-col gap-4 shrink-0">
+<!-- Scrubbing Timeline -->
+<div class="group relative h-2 bg-surface-variant rounded-full cursor-pointer flex items-center">
+<!-- Track fill -->
+<div class="absolute left-0 h-full w-[35%] bg-primary rounded-full"></div>
+<!-- Markers for steps -->
+<div class="absolute left-[10%] w-0.5 h-3 bg-outline-variant rounded-full"></div>
+<div class="absolute left-[25%] w-0.5 h-3 bg-outline-variant rounded-full"></div>
+<div class="absolute left-[35%] w-0.5 h-3 bg-primary rounded-full"></div>
+<div class="absolute left-[60%] w-0.5 h-3 bg-outline-variant rounded-full"></div>
+<!-- Thumb -->
+<div class="absolute left-[35%] -translate-x-1/2 w-4 h-4 bg-primary rounded-full scrubber-thumb transition-transform group-hover:scale-125"></div>
+</div>
+<div class="flex justify-between items-center">
+<!-- Playback -->
+<div class="flex items-center gap-5">
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">skip_previous</span>
+<button class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors border border-primary/20">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">skip_next</span>
+<div class="text-mono-label font-mono-label text-on-surface-variant ml-2 bg-surface-variant/50 px-2 py-1 rounded">
+<span class="text-on-surface">00:15</span> / 01:45
+                                </div>
+</div>
+<!-- Tools & Toggles -->
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-variant rounded p-1 border border-outline-variant/20 shadow-inner">
+<button class="px-4 py-1.5 rounded-sm bg-surface text-on-surface font-label-md text-label-md shadow-sm">Before Action</button>
+<button class="px-4 py-1.5 rounded-sm text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors">After Action</button>
+</div>
+<div class="h-6 w-px bg-outline-variant/30"></div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors" title="Settings">tune</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Action Timeline -->
+<div class="flex flex-col bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-hidden shadow-xl min-h-0 relative">
+<!-- Subtle glass header -->
+<div class="glass-panel p-4 border-b border-outline-variant/20 flex justify-between items-center shrink-0 z-10 sticky top-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">format_list_numbered</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Action Timeline</h3>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant/50">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- Scrollable Steps List -->
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
+<!-- Step 1 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-outline-variant/30 hover:bg-surface-variant/20 cursor-pointer transition-all">
+<div class="text-mono-label font-mono-label text-outline w-10 shrink-0 pt-0.5">00:01</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">language</span>
+<span class="truncate">Navigate to 'https://app.sai.io/login'</span>
+</div>
+</div>
+<div class="opacity-0 group-hover:opacity-100 flex items-center gap-1 shrink-0 transition-opacity">
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">content_cut</span></button>
+<button class="w-7 h-7 rounded hover:bg-error/10 flex items-center justify-center text-on-surface-variant hover:text-error"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-outline-variant/30 hover:bg-surface-variant/20 cursor-pointer transition-all">
+<div class="text-mono-label font-mono-label text-outline w-10 shrink-0 pt-0.5">00:08</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">mouse</span>
+<span class="truncate">Scroll down 200px</span>
+</div>
+</div>
+<div class="opacity-0 group-hover:opacity-100 flex items-center gap-1 shrink-0 transition-opacity">
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">content_cut</span></button>
+<button class="w-7 h-7 rounded hover:bg-error/10 flex items-center justify-center text-on-surface-variant hover:text-error"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</div>
+</div>
+<!-- Step 3 (Active Selection) -->
+<div class="relative group flex items-start gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 shadow-[inset_4px_0_0_0_#adc6ff] cursor-pointer">
+<div class="text-mono-label font-mono-label text-primary w-10 shrink-0 pt-0.5 font-medium">00:15</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 text-body-md font-body-md text-on-surface font-medium mb-1">
+<span class="material-symbols-outlined text-[16px] text-primary">keyboard</span>
+<span class="truncate">Type 'admin@sai.io'</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">my_location</span> Target: input#email-field
+                                </div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="w-7 h-7 rounded hover:bg-primary/20 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[16px]">content_cut</span></button>
+<button class="w-7 h-7 rounded hover:bg-error/10 flex items-center justify-center text-on-surface-variant hover:text-error"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-outline-variant/30 hover:bg-surface-variant/20 cursor-pointer transition-all">
+<div class="text-mono-label font-mono-label text-outline w-10 shrink-0 pt-0.5">00:22</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">ads_click</span>
+<span class="truncate">Click 'Login'</span>
+</div>
+<div class="text-body-sm font-body-sm text-outline flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">my_location</span> Target: button.btn-primary
+                                </div>
+</div>
+<div class="opacity-0 group-hover:opacity-100 flex items-center gap-1 shrink-0 transition-opacity">
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">content_cut</span></button>
+<button class="w-7 h-7 rounded hover:bg-error/10 flex items-center justify-center text-on-surface-variant hover:text-error"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-outline-variant/30 hover:bg-surface-variant/20 cursor-pointer transition-all">
+<div class="text-mono-label font-mono-label text-outline w-10 shrink-0 pt-0.5">00:28</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+<span class="truncate">Wait for network idle</span>
+</div>
+</div>
+<div class="opacity-0 group-hover:opacity-100 flex items-center gap-1 shrink-0 transition-opacity">
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">content_cut</span></button>
+<button class="w-7 h-7 rounded hover:bg-error/10 flex items-center justify-center text-on-surface-variant hover:text-error"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</div>
+</div>
+<!-- Add Action Button -->
+<button class="mt-2 mx-3 py-2 border border-dashed border-outline-variant/50 rounded-lg text-primary text-label-md font-label-md flex items-center justify-center gap-2 hover:bg-primary/5 hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span> Insert Action Step
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Task Review -->

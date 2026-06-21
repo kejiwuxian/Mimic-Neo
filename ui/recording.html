@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sai Recorder - Recording In Progress</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "secondary": "#ffb3ad",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#ffdad7",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#461f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#410004",
+                        "on-tertiary-fixed": "#311400",
+                        "on-surface": "#e1e2ec",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface": "#10131a",
+                        "surface-container": "#1d2027",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3038",
+                        "on-primary": "#002e6a",
+                        "surface-dim": "#10131a",
+                        "outline": "#8c909f",
+                        "tertiary-container": "#df7412",
+                        "on-background": "#e1e2ec",
+                        "on-primary-container": "#00285d",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "surface-container-highest": "#32353c",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container-low": "#191b23",
+                        "error-container": "#93000a",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-container": "#a40217",
+                        "tertiary": "#ffb786",
+                        "background": "#10131a",
+                        "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "container_padding": "24px",
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "mono-label": ["12px", { "lineHeight": "16px", "fontWeight": "450" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glow-pulse {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 180, 171, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(255, 180, 171, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 180, 171, 0); }
+        }
+        
+        .active-action-glow {
+            animation: highlight-blue 2s infinite alternate;
+        }
+        @keyframes highlight-blue {
+            0% { box-shadow: 0 0 0 2px #adc6ff, 0 0 10px #adc6ff; border-color: transparent; }
+            100% { box-shadow: 0 0 0 4px rgba(173, 198, 255, 0.4), 0 0 20px rgba(173, 198, 255, 0.6); border-color: transparent; }
+        }
+    </style>
+</head>
+<body class="bg-surface-lowest text-on-surface h-screen w-screen overflow-hidden flex font-body-md relative font-['Inter']">
+<!-- Desktop Background Wallpaper -->
+<div class="absolute inset-0 z-0 bg-gradient-to-br from-surface-lowest to-surface-container opacity-90" data-alt="A subtle, abstract desktop wallpaper for a software engineer. Deep navy blue and dark gray gradients with very faint, elegant geometric mesh patterns. The style is modern, professional, dark-mode, and minimalistic, ensuring desktop icons and windows remain clearly visible. Lighting is soft and diffused. Mood is focused and calm." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBG1-RePh2aIB8UVulKCyM6wFexH8HY430u5Bn-_kX19UL6EX0EqDJroYA-gICPWzbVmcnGZFEEdPgVAfal4iCM-9jaucj-D3091sTE3aALPXWRAjnNfG3qLgql3kn7Hsb_Ln9r4_JOtzGTAOsa52dvq0oEYbT0mcJABbtRXD9FKZ6er74VBcdMixyEB8WCEJ5h_YgkQMtl6UCbiHEVlTgZ5RmIw72p1HICFR7OKb6JYMRH4yh77bJcENEexCieYXfRf6m1ccNUNuQ')"></div>
+<!-- Desktop Environment Simulator (Mac/Windows generic) -->
+<div class="relative z-10 w-full h-full flex flex-col pt-8 px-8 pb-16">
+<!-- Window 1: Web Browser (GitHub) -->
+<div class="absolute top-12 left-12 w-[65%] h-[75%] bg-[#0d1117] rounded-xl border border-outline-variant/30 shadow-2xl flex flex-col overflow-hidden z-20">
+<!-- Browser Chrome -->
+<div class="h-10 bg-[#161b22] border-b border-outline-variant/20 flex items-center px-4 gap-4 shrink-0">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<div class="w-3 h-3 rounded-full bg-[#f1e05a]"></div>
+<div class="w-3 h-3 rounded-full bg-[#2ea043]"></div>
+</div>
+<div class="flex-1 max-w-xl mx-auto h-6 bg-[#0d1117] rounded border border-outline-variant/30 flex items-center px-3 text-label-sm text-outline font-body-sm">
+<span class="material-symbols-outlined text-[14px] mr-2">lock</span>
+                    github.com/sairecorder/core
+                </div>
+</div>
+<!-- GitHub Mock Content -->
+<div class="flex-1 p-6 overflow-hidden flex flex-col relative">
+<!-- Header -->
+<div class="flex items-center justify-between mb-6 border-b border-outline-variant/20 pb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#8b949e]">book</span>
+<h1 class="text-headline-md text-[#c9d1d9] font-semibold">sairecorder / <span class="font-bold">core</span></h1>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-md text-label-sm text-[#c9d1d9] flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">star</span> Star
+                        </button>
+</div>
+</div>
+<!-- Code view -->
+<div class="flex-1 border border-[#30363d] rounded-md bg-[#0d1117] overflow-hidden flex flex-col">
+<div class="bg-[#161b22] px-4 py-3 border-b border-[#30363d] flex justify-between items-center">
+<div class="flex items-center gap-3 text-body-sm text-[#c9d1d9]">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="A tiny, perfectly square profile picture avatar of a software developer. It shows a sleek, abstract geometric logo in shades of neon blue and dark slate, set against a dark background. The image is clean, high-resolution, and perfectly suited for a GitHub profile icon in a dark-mode UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu-6cjYqumPUSBGhPr5ioDDiNtYncVd1Xk1RYJLehVu5ouTcMe0qp_7fxkK5uoyanMRR_rfygfVnb-I240Wfdq1xpXf0sLv7VPSPBuAKardRN8VPsrwgI2B0nhEWCOmWHZCh4YhOHZOLym9N_52dhHxS76YKXsxu303WRc7uMMTAYprchk1wM-DKgM0sLbbVsB4cajsJ72CO3ogIk3T0cGia0gmsLGuD_BLnntlg-74_xUkCu7pDdsvMUVrD_iWdF76819jwsbDmU"/>
+<span class="font-semibold">dev-sai</span>
+<span>Update engine logic</span>
+</div>
+<span class="text-label-sm text-[#8b949e]">2 hours ago</span>
+</div>
+<!-- THE ACTIVE ACTION TARGET -->
+<div class="p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-[#c9d1d9]">src/engine.ts</span>
+<!-- This button is the current target of the recording action -->
+<button class="active-action-glow relative z-30 px-3 py-1.5 bg-[#2ea043] text-white rounded-md font-semibold text-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+                                Edit File
+                            </button>
+<!-- Ghost overlay explaining the action -->
+<div class="absolute right-[120px] top-4 bg-primary-container/20 border border-primary/50 px-3 py-1.5 rounded text-primary text-label-sm font-mono-label flex items-center gap-2 backdrop-blur-sm animate-pulse z-40">
+<span class="material-symbols-outlined text-[14px]">mouse</span> Click "Edit File"
+                            </div>
+</div>
+<div class="mt-4 font-mono-label text-body-sm text-[#8b949e]">
+<p>1 | import { RecordSession } from './types';</p>
+<p>2 |</p>
+<p>3 | export class SaiEngine {</p>
+<p>4 |   private session: RecordSession;</p>
+<p>5 |   </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Window 2: VS Code (Offset, partially behind) -->
+<div class="absolute top-24 right-12 w-[55%] h-[80%] bg-[#1e1e1e] rounded-xl border border-black/50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden z-10 opacity-90 blur-[1px]">
+<!-- VS Code Chrome -->
+<div class="h-8 bg-[#323233] flex justify-center items-center text-label-sm text-gray-400">
+                src/engine.ts - core - Visual Studio Code
+             </div>
+<div class="flex flex-1 overflow-hidden">
+<div class="w-12 bg-[#333333] flex flex-col items-center py-4 gap-6 text-gray-400">
+<span class="material-symbols-outlined text-[20px]">file_copy</span>
+<span class="material-symbols-outlined text-[20px]">search</span>
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+</div>
+<div class="flex-1 bg-[#1e1e1e] p-4 font-mono-label text-[#d4d4d4]">
+<p><span class="text-[#c586c0]">import</span> { RecordSession } <span class="text-[#c586c0]">from</span> <span class="text-[#ce9178]">'./types'</span>;</p>
+<br/>
+<p><span class="text-[#c586c0]">export</span> <span class="text-[#569cd6]">class</span> <span class="text-[#4ec9b0]">SaiEngine</span> {</p>
+<p>  <span class="text-[#569cd6]">private</span> session: <span class="text-[#4ec9b0]">RecordSession</span>;</p>
+</div>
+</div>
+</div>
+<!-- Floating Recording Overlay (Bottom Right) -->
+<div class="absolute bottom-8 right-8 w-80 bg-surface-container/80 backdrop-blur-xl border border-outline-variant/30 shadow-2xl rounded-xl z-50 overflow-hidden flex flex-col pointer-events-auto">
+<!-- Header / Status -->
+<div class="bg-surface-container-high px-4 py-3 flex items-center justify-between border-b border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="relative flex items-center justify-center w-3 h-3">
+<div class="absolute w-full h-full bg-error rounded-full glow-pulse"></div>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full"></div>
+</div>
+<span class="text-label-md text-error font-semibold uppercase tracking-wider">Recording</span>
+</div>
+<span class="font-mono-label text-body-md text-on-surface">00:14:23</span>
+</div>
+<!-- Current Action Info -->
+<div class="p-4 flex flex-col gap-3">
+<div class="text-label-sm text-outline font-medium uppercase tracking-widest">Current Action</div>
+<div class="flex items-start gap-3 bg-surface-container-lowest/50 p-3 rounded-lg border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary mt-0.5">mouse</span>
+<div>
+<div class="text-body-md font-medium text-on-surface">Click Button</div>
+<div class="text-body-sm text-on-surface-variant font-mono-label truncate w-48" title="button.btn-primary.edit-file">Target: button.btn-primary</div>
+</div>
+</div>
+</div>
+<!-- Global Controls -->
+<div class="px-4 py-3 bg-surface-container-low flex justify-between items-center border-t border-outline-variant/10">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">pause</span>
+</button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-full font-label-md hover:bg-primary-container hover:text-on-primary-container transition-all shadow-lg hover:shadow-primary/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">stop_circle</span>
+                    STOP
+                </button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Recording in Progress -->

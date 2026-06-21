@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Export &amp; Share - Sai Recorder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "secondary": "#ffb3ad",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#ffdad7",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-tertiary-container": "#461f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#410004",
+                        "on-tertiary-fixed": "#311400",
+                        "on-surface": "#e1e2ec",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface": "#10131a",
+                        "surface-container": "#1d2027",
+                        "inverse-primary": "#005ac2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3038",
+                        "on-primary": "#002e6a",
+                        "surface-dim": "#10131a",
+                        "outline": "#8c909f",
+                        "tertiary-container": "#df7412",
+                        "on-background": "#e1e2ec",
+                        "on-primary-container": "#00285d",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "surface-container-highest": "#32353c",
+                        "on-surface-variant": "#c2c6d6",
+                        "surface-container-low": "#191b23",
+                        "error-container": "#93000a",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-container": "#a40217",
+                        "tertiary": "#ffb786",
+                        "background": "#10131a",
+                        "on-secondary-fixed-variant": "#930013"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "container_padding": "24px",
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "mono-label": ["12px", { "lineHeight": "16px", "fontWeight": "450" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A; /* Deep Navy Level 0 */
+            color: #e1e2ec;
+        }
+        .glass-panel {
+            background-color: rgba(30, 41, 59, 0.6); /* Slate Gray with 60% opacity */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .recessed-input {
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(66, 71, 84, 0.5);
+        }
+        .recessed-input:focus-within {
+            border-color: #adc6ff; /* Action Blue */
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased overflow-hidden selection:bg-primary-container/30 selection:text-primary">
+<!-- App Container -->
+<div class="flex h-screen w-full">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container dark:bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/10 shadow-xl shadow-surface-container-lowest/50 flex flex-col py-6 z-50">
+<!-- Header -->
+<div class="px-6 mb-8 flex flex-col gap-1">
+<h1 class="text-headline-lg font-headline-lg font-bold text-primary dark:text-primary tracking-tight">Sai Recorder</h1>
+<p class="text-label-md font-label-md text-on-surface-variant">Automation Hub</p>
+</div>
+<!-- Tabs -->
+<div class="flex flex-col gap-1 px-2 flex-grow">
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="text-label-md font-label-md">Home</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">folder_copy</span>
+<span class="text-label-md font-label-md">Task Library</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">play_circle</span>
+<span class="text-label-md font-label-md">Replay</span>
+</a>
+<a class="text-primary dark:text-primary border-l-4 border-primary bg-primary-container/10 px-4 py-3 flex items-center gap-3 transition-all rounded-r-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">output</span>
+<span class="text-label-md font-label-md">Export</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+<span class="text-label-md font-label-md">Insights</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:text-on-surface hover:bg-surface-variant/20 dark:hover:bg-surface-variant/20 transition-all duration-200 rounded-md active:scale-95 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+<!-- Footer / CTA -->
+<div class="px-4 mt-auto">
+<button class="w-full bg-primary hover:bg-primary-fixed text-on-primary py-3 rounded-md text-label-md font-label-md font-bold transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">radio_button_checked</span>
+                    Start Recording
+                </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-[260px] w-[calc(100%-260px)] h-full flex flex-col relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-8 docked full-width top-0 sticky z-40 bg-transparent bg-background/80 backdrop-blur-sm">
+<div class="flex items-center gap-4">
+<h2 class="text-headline-md font-headline-md text-primary font-bold">Export Details</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 bg-error-container/20 text-error px-3 py-1.5 rounded-full border border-error/20">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(255,180,171,0.6)]"></span>
+<span class="text-label-sm font-label-sm font-bold tracking-wider">REC</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto p-lg pb-32">
+<div class="max-w-7xl mx-auto flex flex-col gap-lg">
+<!-- Top 3 Columns Bento Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Col 1: Export Format -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-md flex flex-col gap-md">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">data_object</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Export Format</h3>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Option 1 (Selected) -->
+<label class="flex items-start gap-3 p-3 rounded-lg bg-primary-container/10 border border-primary/30 cursor-pointer transition-colors">
+<div class="pt-0.5">
+<input checked="" class="text-primary bg-surface border-outline-variant focus:ring-primary focus:ring-offset-surface" name="export_format" type="radio"/>
+</div>
+<div class="flex flex-col">
+<span class="text-body-md font-body-md font-semibold text-primary">JSON Trajectory</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant mt-1">Structured data with semantic UI mappings and timing.</span>
+</div>
+</label>
+<!-- Option 2 -->
+<label class="flex items-start gap-3 p-3 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<div class="pt-0.5">
+<input class="text-primary bg-surface border-outline-variant focus:ring-primary focus:ring-offset-surface" name="export_format" type="radio"/>
+</div>
+<div class="flex flex-col">
+<span class="text-body-md font-body-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">PNG Keyframe Bundle</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant mt-1">Annotated screenshots of critical state changes.</span>
+</div>
+</label>
+<!-- Option 3 -->
+<label class="flex items-start gap-3 p-3 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<div class="pt-0.5">
+<input class="text-primary bg-surface border-outline-variant focus:ring-primary focus:ring-offset-surface" name="export_format" type="radio"/>
+</div>
+<div class="flex flex-col">
+<span class="text-body-md font-body-md font-semibold text-on-surface group-hover:text-primary-fixed transition-colors">Python Automation Script</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant mt-1">Playwright/Selenium ready executable code.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Col 2: Compression Summary -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-md flex flex-col gap-md justify-between relative overflow-hidden">
+<!-- Decorative background glow -->
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary">compress</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Compression Summary</h3>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-end border-b border-outline-variant/20 pb-2">
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Naive Capture</span>
+<span class="text-body-lg font-body-lg text-on-surface opacity-70">1,200 frames</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-xl">fast_forward</span>
+</div>
+<div class="flex justify-between items-end pb-2">
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary uppercase tracking-wider">Sai Compressed</span>
+<span class="text-headline-md font-headline-md text-primary-fixed font-bold">42 frames</span>
+</div>
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-center p-4 bg-tertiary-container/20 rounded-lg border border-tertiary-container/50">
+<div class="text-center">
+<span class="text-headline-xl font-headline-xl font-black text-tertiary tracking-tight block">96%</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold uppercase tracking-widest mt-1 block">Token Reduction</span>
+</div>
+</div>
+</div>
+<!-- Col 3: Destinations -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-md flex flex-col gap-md">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary">share</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Destinations</h3>
+</div>
+<div class="grid grid-cols-2 gap-3 h-full">
+<!-- Dest 1 -->
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low hover:bg-surface-variant hover:border-primary/50 transition-all group">
+<span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">folder_zip</span>
+<span class="text-label-sm font-label-sm text-center text-on-surface group-hover:text-primary-fixed">Download ZIP</span>
+</button>
+<!-- Dest 2 -->
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low hover:bg-surface-variant hover:border-primary/50 transition-all group">
+<span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">content_copy</span>
+<span class="text-label-sm font-label-sm text-center text-on-surface group-hover:text-primary-fixed">Copy to Clipboard</span>
+</button>
+<!-- Dest 3 -->
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-outline-variant/30 bg-surface-container-low hover:bg-surface-variant hover:border-primary/50 transition-all group">
+<span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">forum</span>
+<span class="text-label-sm font-label-sm text-center text-on-surface group-hover:text-primary-fixed">Send to Slack</span>
+</button>
+<!-- Dest 4 -->
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-primary/50 bg-primary/10 hover:bg-primary/20 transition-all group shadow-[0_0_15px_rgba(173,198,255,0.1)]">
+<span class="material-symbols-outlined text-[28px] text-primary transition-colors" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span class="text-label-sm font-label-sm text-center text-primary font-bold">Push to AI Agent</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bottom: Code Snippet Preview -->
+<div class="glass-panel rounded-xl border-t border-outline-variant/20 flex flex-col overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+<!-- Code Header -->
+<div class="flex items-center justify-between px-md py-3 bg-surface-container-lowest border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline text-sm">code</span>
+<span class="text-label-md font-label-md text-on-surface-variant font-mono">trajectory_output.json</span>
+</div>
+<div class="flex gap-2">
+<button class="text-label-sm font-label-sm text-primary hover:text-primary-fixed flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]">content_copy</span> Copy
+                                </button>
+</div>
+</div>
+<!-- Code Body -->
+<div class="p-md bg-[#0B0E15] overflow-x-auto">
+<pre class="font-mono-label text-mono-label leading-relaxed text-on-surface-variant selection:bg-primary/30"><span class="text-secondary">{</span>
+  <span class="text-primary-fixed-dim">"metadata"</span>: <span class="text-secondary">{</span>
+    <span class="text-primary-fixed-dim">"session_id"</span>: <span class="text-[#89b4fa]">"seq_8842_x"</span>,
+    <span class="text-primary-fixed-dim">"duration_ms"</span>: <span class="text-[#fab387]">14250</span>,
+    <span class="text-primary-fixed-dim">"compression_ratio"</span>: <span class="text-[#fab387]">0.96</span>
+  <span class="text-secondary">}</span>,
+  <span class="text-primary-fixed-dim">"trajectory"</span>: <span class="text-tertiary">[</span>
+    <span class="text-secondary-fixed">{</span>
+      <span class="text-primary-fixed-dim">"step"</span>: <span class="text-[#fab387]">1</span>,
+      <span class="text-primary-fixed-dim">"action_type"</span>: <span class="text-[#89b4fa]">"click"</span>,
+      <span class="text-primary-fixed-dim">"target"</span>: <span class="text-secondary">{</span>
+        <span class="text-primary-fixed-dim">"semantic_label"</span>: <span class="text-[#89b4fa]">"Export Format Dropdown"</span>,
+        <span class="text-primary-fixed-dim">"dom_path"</span>: <span class="text-[#89b4fa]">"div#export-panel &gt; select.format"</span>,
+        <span class="text-primary-fixed-dim">"bounding_box"</span>: <span class="text-tertiary">[</span><span class="text-[#fab387]">450</span>, <span class="text-[#fab387]">220</span>, <span class="text-[#fab387]">120</span>, <span class="text-[#fab387]">40</span><span class="text-tertiary">]</span>
+      <span class="text-secondary">}</span>,
+      <span class="text-primary-fixed-dim">"timestamp_offset"</span>: <span class="text-[#fab387]">450</span>
+    <span class="text-secondary-fixed">}</span>,
+    <span class="text-outline italic">// 40 compressed steps omitted for brevity...</span>
+  <span class="text-tertiary">]</span>
+<span class="text-secondary">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Export Action Bar (Floating) -->
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-2 glass-panel rounded-full shadow-2xl shadow-black/50 border border-primary/20">
+<button class="px-6 py-2.5 rounded-full text-label-md font-label-md text-on-surface hover:bg-surface-variant transition-colors">Cancel</button>
+<button class="px-8 py-2.5 rounded-full bg-primary hover:bg-primary-fixed text-on-primary text-label-md font-label-md font-bold transition-colors shadow-[0_0_20px_rgba(173,198,255,0.3)] flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">send</span>
+                    Execute Export
+                </button>
+</div>
+</main>
+</div>
+
+  <script src="app.js"></script>
+</body></html>
+
+<!-- Export & Share -->
