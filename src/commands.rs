@@ -1,6 +1,6 @@
 //! Tauri command layer: recording control, task library management, and replay.
 
-use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering::SeqCst};
+use std::sync::atomic::{AtomicBool, Ordering::SeqCst};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::time::Duration;
@@ -85,8 +85,8 @@ fn float_position(app: &AppHandle) -> (f64, f64) {
     (80.0, 80.0)
 }
 
-/// Create (or reuse) and show the float overlay window. Built with an explicit
-/// size *and* position so it never collapses to the 0,0 corner.
+/// Create (or reuse) and show the float overlay. MUST be called on the main
+/// thread (webview creation requirement) — callers schedule via run_on_main_thread.
 fn open_and_show_float(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     if let Some(w) = app.get_webview_window("float") {
         let _ = w.show();
@@ -110,31 +110,40 @@ fn open_and_show_float(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     Ok(w)
 }
 
-#[cfg(windows)]
-fn window_hwnd_isize(w: &WebviewWindow) -> isize {
-    w.hwnd().map(|h| h.0 as isize).unwrap_or(0)
+/// Schedule float-overlay creation on the main thread (non-blocking for caller).
+fn schedule_open_float(app: &AppHandle) {
+    let app2 = app.clone();
+    let _ = app.run_on_main_thread(move || match open_and_show_float(&app2) {
+        Ok(_) => crate::log::line("float window result: ok"),
+        Err(e) => crate::log::line(&format!("float window result: err: {e}")),
+    });
 }
 
-#[cfg(not(windows))]
-fn window_hwnd_isize(_w: &WebviewWindow) -> isize {
-    0
+fn close_float(app: &AppHandle) {
+    let app2 = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Some(w) = app2.get_webview_window("float") {
+            let _ = w.close();
+        }
+    });
 }
 
 #[tauri::command]
 pub async fn open_float_window(app: AppHandle) -> Result<(), String> {
-    open_and_show_float(&app).map_err(|e| e.to_string())?;
+    schedule_open_float(&app);
     Ok(())
 }
 
 // ── Recording control ────────────────────────────────────────────────────────
+// NOTE: start/stop are `#[tauri::command(async)]` so they run on the threadpool,
+// NOT the main thread. A sync command would block the main thread's message pump
+// while it runs — freezing our own webview (no input / no `invoke`). Window
+// creation is still marshaled to the main thread via run_on_main_thread.
 
-#[tauri::command]
-pub fn start_recording(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    opts: RecordOptionsDto,
-) -> Result<(), String> {
+#[tauri::command(async)]
+pub fn start_recording(app: AppHandle, opts: RecordOptionsDto) -> Result<(), String> {
     crate::log::line("start_recording invoked");
+    let state = app.state::<AppState>();
 
     if state.replaying.load(SeqCst) {
         crate::log::line("start_recording: rejected (replay in progress)");
@@ -157,36 +166,44 @@ pub fn start_recording(
         options.compression.max_dim
     ));
 
-    // Spawn the capture worker FIRST so recording starts regardless of the
-    // overlay. The HWND is shared and filled in once the overlay exists.
+    // Spawn the worker (records until stop). The global hotkey calls perform_stop.
     let stop = Arc::new(AtomicBool::new(false));
-    let overlay_hwnd = Arc::new(AtomicIsize::new(0));
-    let worker = recorder::start_worker(options.clone(), stop.clone(), overlay_hwnd.clone());
+    let app_hk = app.clone();
+    let on_hotkey: recorder::StopHotkey = Arc::new(move || {
+        let app = app_hk.clone();
+        std::thread::spawn(move || {
+            crate::log::line("stop via hotkey");
+            let _ = perform_stop(&app);
+        });
+    });
+    let worker = recorder::start_worker(options.clone(), stop.clone(), on_hotkey);
     crate::log::line("worker spawned");
 
     *state.rec.lock().unwrap() = Some(Session { stop, options, worker });
     let _ = app.emit("recording-started", ());
 
-    // Open the float overlay (NON-FATAL): failures are logged but never abort
-    // the recording. On success, publish its HWND for input filtering.
-    crate::log::line("opening float window");
-    match open_and_show_float(&app) {
-        Ok(w) => {
-            let h = window_hwnd_isize(&w);
-            overlay_hwnd.store(h, SeqCst);
-            crate::log::line(&format!("float window result: ok (hwnd={h})"));
-        }
-        Err(e) => {
-            crate::log::line(&format!("float window result: err: {e}"));
-        }
-    }
+    // Create the overlay on the main thread (non-fatal, non-blocking).
+    crate::log::line("scheduling float window on main thread");
+    schedule_open_float(&app);
     Ok(())
 }
 
-#[tauri::command]
-pub fn stop_recording(app: AppHandle, state: State<'_, AppState>) -> Result<TaskMeta, String> {
+#[tauri::command(async)]
+pub fn stop_recording(app: AppHandle) -> Result<TaskMeta, String> {
+    perform_stop(&app)
+}
+
+/// Shared stop + finalize used by the Stop button(s) AND the global hotkey.
+/// Whoever takes the session from the mutex first performs the finalize; the
+/// other caller sees `None` and no-ops.
+fn perform_stop(app: &AppHandle) -> Result<TaskMeta, String> {
     crate::log::line("stop invoked");
-    let session = match state.rec.lock().unwrap().take() {
+    let session = {
+        let state = app.state::<AppState>();
+        let taken = state.rec.lock().unwrap().take();
+        taken
+    };
+    let session = match session {
         Some(s) => s,
         None => {
             crate::log::line("stop: rejected (not recording)");
@@ -213,10 +230,7 @@ pub fn stop_recording(app: AppHandle, state: State<'_, AppState>) -> Result<Task
         Ok(m) => m,
         Err(e) => {
             crate::log::line(&format!("export error: {e}"));
-            // Still close the overlay so the UI isn't stuck.
-            if let Some(w) = app.get_webview_window("float") {
-                let _ = w.close();
-            }
+            close_float(app);
             return Err(e.to_string());
         }
     };
@@ -230,12 +244,11 @@ pub fn stop_recording(app: AppHandle, state: State<'_, AppState>) -> Result<Task
         meta.compression.get("sizeRatio").cloned().unwrap_or_default()
     ));
 
-    if let Some(w) = app.get_webview_window("float") {
-        let _ = w.close();
-    }
+    close_float(app);
     let _ = app.emit("recording-finished", meta.clone());
     Ok(meta)
 }
+
 
 #[tauri::command]
 pub fn recording_state(state: State<'_, AppState>) -> bool {
@@ -577,5 +590,80 @@ pub fn selftest() {
             crate::log::line(&format!("selftest: save error: {e}"));
             println!("SELFTEST FAIL: {e}");
         }
+    }
+}
+
+/// Headless verification of the LIVE pipeline: spawns the real worker, injects a
+/// couple of benign input events + the Ctrl+Alt+S hotkey, then stops and saves —
+/// confirming (a) events are captured (listen not blocked), (c) the hotkey fires,
+/// and that a real recorded session writes token metrics. Run via
+/// `sai-recorder.exe --selftest-record`.
+pub fn selftest_record() {
+    use rdev::{simulate, Button, EventType, Key};
+
+    crate::log::line("selftest_record: begin");
+    let options = RecordOptions {
+        mode: Mode::Sai,
+        compression: CompressionOptions { lossy: true, quality: 70, max_dim: Some(640), crop_focus: false },
+        fps: 6.0,
+        history_secs: 4,
+    };
+
+    let stop = Arc::new(AtomicBool::new(false));
+    let fired = Arc::new(AtomicBool::new(false));
+    let fired2 = fired.clone();
+    let on_hotkey: recorder::StopHotkey = Arc::new(move || {
+        fired2.store(true, SeqCst);
+        crate::log::line("selftest_record: on_hotkey fired");
+    });
+
+    let worker = recorder::start_worker(options.clone(), stop.clone(), on_hotkey);
+    std::thread::sleep(Duration::from_millis(900)); // warm up listener + ring buffer
+
+    let tap = |et: EventType| {
+        let _ = simulate(&et);
+        std::thread::sleep(Duration::from_millis(140));
+    };
+    // One benign real action (move + a single wheel notch) → exercises capture+compress.
+    tap(EventType::MouseMove { x: 500.0, y: 400.0 });
+    tap(EventType::Wheel { delta_x: 0, delta_y: -1 });
+    let _ = simulate(&EventType::ButtonPress(Button::Middle)); // no-op-ish; ensure an action flushes
+    std::thread::sleep(Duration::from_millis(120));
+    let _ = simulate(&EventType::ButtonRelease(Button::Middle));
+    std::thread::sleep(Duration::from_millis(1100)); // allow debounce flush
+
+    // Global stop hotkey: Ctrl+Alt+S
+    tap(EventType::KeyPress(Key::ControlLeft));
+    tap(EventType::KeyPress(Key::Alt));
+    tap(EventType::KeyPress(Key::KeyS));
+    tap(EventType::KeyRelease(Key::KeyS));
+    tap(EventType::KeyRelease(Key::Alt));
+    tap(EventType::KeyRelease(Key::ControlLeft));
+    std::thread::sleep(Duration::from_millis(400));
+
+    stop.store(true, SeqCst); // belt-and-suspenders if injection didn't register
+    let output = match worker.join() {
+        Ok(o) => o,
+        Err(_) => {
+            println!("SELFTEST_RECORD FAIL: worker panicked");
+            return;
+        }
+    };
+    let hotkey_ok = fired.load(SeqCst);
+    crate::log::line(&format!(
+        "selftest_record: actions={} captures={} hotkey_fired={}",
+        output.actions.len(),
+        output.stats.shots,
+        hotkey_ok
+    ));
+    match tasks::save_recording(&output, &options) {
+        Ok(meta) => {
+            crate::log::line(&format!("selftest_record: task saved {} | compression={}", meta.id, meta.compression));
+            println!(
+                "SELFTEST_RECORD OK actions={} captures={} hotkey_fired={} task={} compression={}",
+                output.actions.len(), output.stats.shots, hotkey_ok, meta.id, meta.compression
+            );
+        }
+        Err(e) => println!("SELFTEST_RECORD FAIL save: {e}"),
     }
 }

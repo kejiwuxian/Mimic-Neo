@@ -13,7 +13,7 @@
 //! Nothing is sent anywhere without passing the local review gate first.
 
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -402,21 +402,23 @@ pub struct RecorderOutput {
     pub duration_ms: u64,
 }
 
+/// Callback invoked when the global stop hotkey (Ctrl+Alt+S) is detected.
+pub type StopHotkey = Arc<dyn Fn() + Send + Sync + 'static>;
+
 /// Start the capture pipeline on a background thread. Returns a join handle that
 /// yields the recorded actions + compression stats once `stop` is set.
 ///
-/// `overlay_hwnd` holds the float control window's HWND (as isize), shared so it
-/// can be populated *after* the worker starts (recording does not wait on the
-/// overlay). `0` means "no overlay yet" — input filtering is simply skipped.
+/// `on_hotkey` is called from the capture thread when Ctrl+Alt+S is pressed, so a
+/// recording can always be ended even if the UI is unresponsive.
 pub fn start_worker(
     opts: RecordOptions,
     stop: Arc<AtomicBool>,
-    overlay_hwnd: Arc<AtomicIsize>,
+    on_hotkey: StopHotkey,
 ) -> JoinHandle<RecorderOutput> {
-    std::thread::spawn(move || run_worker(opts, stop, overlay_hwnd))
+    std::thread::spawn(move || run_worker(opts, stop, on_hotkey))
 }
 
-fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: Arc<AtomicIsize>) -> RecorderOutput {
+fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, on_hotkey: StopHotkey) -> RecorderOutput {
     let started_ms = epoch_ms();
     let recording_start = SystemTime::now();
     crate::log::line(&format!(
@@ -438,18 +440,47 @@ fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: Arc<Atom
     crate::log::line("worker: input listener spawned; capturing");
 
     let mut state = RecorderState::new(opts.compression.clone(), recording_start);
-    // Last known cursor (rdev button/wheel events carry no coords) for overlay hit-testing.
+    // Last known cursor (rdev button/wheel events carry no coords) for hit-testing.
     let mut cursor = (0.0f64, 0.0f64);
     let mut last_logged = 0usize;
+    // Modifier tracking for the global stop hotkey (Ctrl+Alt+S).
+    let mut ctrl = false;
+    let mut alt = false;
 
     loop {
         match event_rx.recv_timeout(DEBOUNCE_DELAY) {
             Ok(event) => {
-                if let EventType::MouseMove { x, y } = &event.event_type {
-                    cursor = (*x, *y);
+                match &event.event_type {
+                    EventType::KeyPress(k) => {
+                        if matches!(k, Key::ControlLeft | Key::ControlRight) {
+                            ctrl = true;
+                        }
+                        if matches!(k, Key::Alt | Key::AltGr) {
+                            alt = true;
+                        }
+                        if ctrl && alt && matches!(k, Key::KeyS) {
+                            crate::log::line("worker: hotkey Ctrl+Alt+S -> stop");
+                            (on_hotkey)();
+                            stop.store(true, Ordering::SeqCst);
+                            break;
+                        }
+                    }
+                    EventType::KeyRelease(k) => {
+                        if matches!(k, Key::ControlLeft | Key::ControlRight) {
+                            ctrl = false;
+                        }
+                        if matches!(k, Key::Alt | Key::AltGr) {
+                            alt = false;
+                        }
+                    }
+                    EventType::MouseMove { x, y } => {
+                        cursor = (*x, *y);
+                    }
+                    _ => {}
                 }
-                if overlay::event_targets_overlay(&event, overlay_hwnd.load(Ordering::SeqCst), cursor) {
-                    continue; // ignore the overlay's own Stop click / drag / typing
+                // Never record input aimed at our own windows (overlay/main/helpers).
+                if overlay::event_targets_self(&event, cursor) {
+                    continue;
                 }
                 state.handle(event);
                 let n = state.action_count();

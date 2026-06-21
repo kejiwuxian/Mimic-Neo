@@ -28,6 +28,11 @@ fn main() {
         commands::selftest();
         return;
     }
+    // Headless LIVE verification: real worker + injected input + Ctrl+Alt+S hotkey.
+    if std::env::args().any(|a| a == "--selftest-record") {
+        commands::selftest_record();
+        return;
+    }
 
     tauri::Builder::default()
         .manage(commands::AppState::default())

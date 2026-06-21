@@ -31,11 +31,12 @@ reqwest = { version = "0.12", features = ["blocking", "json"] }
 # App-data directory (%APPDATA%) for the task library.
 dirs = "6"
 
-# Win32 only for dropping input events that target the float overlay window.
+# Win32 only for dropping input events that target the recorder's own windows.
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Threading",
 ] }
 
 [profile.release]
