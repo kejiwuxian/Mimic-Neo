@@ -11,6 +11,7 @@ use anyhow::Result;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::ops::Sub;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::{LazyLock, Mutex};
 use std::time::{Duration, Instant};
@@ -156,6 +157,21 @@ static FRAME_RING: LazyLock<Mutex<Option<RingState>>> = LazyLock::new(|| Mutex::
 static RECORDER: LazyLock<Mutex<Option<VideoRecorder>>> = LazyLock::new(|| Mutex::new(None));
 static SCHEDULER: LazyLock<Mutex<Option<(timer::Timer, timer::Guard)>>> =
     LazyLock::new(|| Mutex::new(None));
+/// Count of frames the xcap ring buffer has actually delivered (for logging).
+static RING_FRAMES: AtomicUsize = AtomicUsize::new(0);
+
+/// Encode an RGBA buffer to lossless WebP (the compression baseline). Shared by
+/// the xcap ring buffer and the GDI fallback so both feed the same downstream.
+fn encode_rgba_webp(raw: &[u8], width: u32, height: u32) -> Option<Vec<u8>> {
+    let mut webp = Vec::new();
+    match WebPEncoder::new_lossless(&mut webp).write_image(raw, width, height, ColorType::Rgba8.into()) {
+        Ok(()) => Some(webp),
+        Err(e) => {
+            crate::log::line(&format!("capture: webp encode error: {e}"));
+            None
+        }
+    }
+}
 
 /// Start the background frame pump on `screen`, keeping `history` seconds of
 /// frames at `frequency` fps. Idempotent.
@@ -176,13 +192,17 @@ pub fn start_recording(screen: &Monitor, history: Duration, frequency: f32) -> R
         capacity,
         frames: VecDeque::with_capacity(capacity),
     });
+    RING_FRAMES.store(0, Ordering::Relaxed);
 
     let timer = timer::Timer::new();
     let guard = timer.schedule_repeating(
         chrono::Duration::from_std(capture_interval).unwrap(),
         move || {
-            let Ok(frame) = raw_rx.recv() else {
-                return;
+            // Don't block the timer thread forever if xcap never delivers frames
+            // (common on VM/virtual displays — the GDI fallback covers that case).
+            let frame = match raw_rx.recv_timeout(Duration::from_millis(500)) {
+                Ok(f) => f,
+                Err(_) => return,
             };
 
             let timestamp = Instant::now();
@@ -191,10 +211,16 @@ pub fn start_recording(screen: &Monitor, history: Duration, frequency: f32) -> R
             let raw = frame.raw;
 
             std::thread::spawn(move || {
-                let mut webp = Vec::new();
-                WebPEncoder::new_lossless(&mut webp)
-                    .write_image(&raw, width, height, ColorType::Rgba8.into())
-                    .expect("WebP encoding to Vec<u8> should never fail");
+                let Some(webp) = encode_rgba_webp(&raw, width, height) else {
+                    return;
+                };
+                let n = RING_FRAMES.fetch_add(1, Ordering::Relaxed) + 1;
+                if n == 1 || n % 10 == 0 {
+                    crate::log::line(&format!(
+                        "ring-buffer: captured frame {width}x{height}, {} bytes (#{n})",
+                        webp.len()
+                    ));
+                }
 
                 if let Some(ref mut state) = *FRAME_RING.lock().unwrap() {
                     while state.frames.len() >= state.capacity {
@@ -231,33 +257,134 @@ pub fn stop_recording() -> Result<()> {
 }
 
 /// Frame closest to `delta` ago (lossless WebP bytes), e.g. the "before" frame.
+/// Falls back to an on-demand GDI capture when the ring buffer is empty (xcap's
+/// WGC/DXGI path fails or yields no frames on VM/virtual displays).
 pub fn retrieve_frame(delta: Duration) -> Option<Vec<u8>> {
-    let ring_opt = FRAME_RING.lock().unwrap();
-    let state = ring_opt.as_ref()?;
-    if state.frames.is_empty() {
-        return None;
-    }
-    let target = Instant::now().checked_sub(delta).unwrap_or_else(Instant::now);
-    state
-        .frames
-        .iter()
-        .rfind(|f| f.timestamp <= target)
-        .or_else(|| state.frames.front())
-        .map(|f| f.data.clone())
+    {
+        let ring_opt = FRAME_RING.lock().unwrap();
+        if let Some(state) = ring_opt.as_ref() {
+            if !state.frames.is_empty() {
+                let target = Instant::now().checked_sub(delta).unwrap_or_else(Instant::now);
+                return state
+                    .frames
+                    .iter()
+                    .rfind(|f| f.timestamp <= target)
+                    .or_else(|| state.frames.front())
+                    .map(|f| f.data.clone());
+            }
+        }
+    } // release the lock before the (slower) GDI grab
+    gdi_capture_webp()
 }
 
-/// Frame nearest a specific instant.
+/// Frame nearest a specific instant; GDI fallback when the ring is empty.
 pub fn closest_frame(time: Instant) -> Option<Vec<u8>> {
-    let ring_opt = FRAME_RING.lock().unwrap();
-    let state = ring_opt.as_ref()?;
-    if state.frames.is_empty() {
-        return None;
+    {
+        let ring_opt = FRAME_RING.lock().unwrap();
+        if let Some(state) = ring_opt.as_ref() {
+            if !state.frames.is_empty() {
+                return state
+                    .frames
+                    .iter()
+                    .min_by_key(|f| (time.sub(f.timestamp)).as_nanos())
+                    .map(|f| f.data.clone());
+            }
+        }
     }
-    state
-        .frames
-        .iter()
-        .min_by_key(|f| (time.sub(f.timestamp)).as_nanos())
-        .map(|f| f.data.clone())
+    gdi_capture_webp()
+}
+
+// ── GDI BitBlt fallback ──────────────────────────────────────────────────────
+// xcap uses Windows.Graphics.Capture / DXGI Desktop Duplication, which commonly
+// fails (E_INVALIDARG / 0x80070057) or returns no frames on VMs and virtual
+// displays. GDI BitBlt works there, so we grab the primary screen on demand and
+// encode it to the same lossless WebP the ring buffer would have produced.
+
+fn log_gdi_once(width: u32, height: u32, bytes: usize) {
+    static LOGGED: AtomicBool = AtomicBool::new(false);
+    if !LOGGED.swap(true, Ordering::Relaxed) {
+        crate::log::line(&format!(
+            "gdi: capturing primary screen {width}x{height} -> {bytes} bytes (xcap fallback)"
+        ));
+    }
+}
+
+#[cfg(windows)]
+fn gdi_capture_webp() -> Option<Vec<u8>> {
+    use std::mem::size_of;
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::Graphics::Gdi::{
+        BitBlt, CreateCompatibleBitmap, CreateCompatibleDC, DeleteDC, DeleteObject, GetDC,
+        GetDIBits, ReleaseDC, SelectObject, BITMAPINFO, BITMAPINFOHEADER, BI_RGB, DIB_RGB_COLORS,
+        SRCCOPY,
+    };
+    use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN};
+
+    unsafe {
+        let w = GetSystemMetrics(SM_CXSCREEN);
+        let h = GetSystemMetrics(SM_CYSCREEN);
+        if w <= 0 || h <= 0 {
+            crate::log::line("gdi: bad screen metrics");
+            return None;
+        }
+
+        let screen = GetDC(HWND::default());
+        if screen.0.is_null() {
+            crate::log::line("gdi: GetDC failed");
+            return None;
+        }
+        let mem = CreateCompatibleDC(screen);
+        let bmp = CreateCompatibleBitmap(screen, w, h);
+        let old = SelectObject(mem, bmp);
+        let blt = BitBlt(mem, 0, 0, w, h, screen, 0, 0, SRCCOPY);
+
+        let mut buf = vec![0u8; (w as usize) * (h as usize) * 4];
+        let mut bmi = BITMAPINFO::default();
+        bmi.bmiHeader.biSize = size_of::<BITMAPINFOHEADER>() as u32;
+        bmi.bmiHeader.biWidth = w;
+        bmi.bmiHeader.biHeight = -h; // negative => top-down rows
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32;
+        bmi.bmiHeader.biCompression = BI_RGB.0;
+        let lines = GetDIBits(
+            mem,
+            bmp,
+            0,
+            h as u32,
+            Some(buf.as_mut_ptr() as *mut core::ffi::c_void),
+            &mut bmi,
+            DIB_RGB_COLORS,
+        );
+
+        // Cleanup GDI objects.
+        SelectObject(mem, old);
+        let _ = DeleteObject(bmp);
+        let _ = DeleteDC(mem);
+        ReleaseDC(HWND::default(), screen);
+
+        if blt.is_err() || lines == 0 {
+            crate::log::line(&format!(
+                "gdi: capture failed (blt_ok={}, lines={lines})",
+                blt.is_ok()
+            ));
+            return None;
+        }
+
+        // GDI returns BGRA (32bpp); convert to RGBA and force opaque alpha.
+        for px in buf.chunks_exact_mut(4) {
+            px.swap(0, 2);
+            px[3] = 255;
+        }
+
+        let bytes = encode_rgba_webp(&buf, w as u32, h as u32)?;
+        log_gdi_once(w as u32, h as u32, bytes.len());
+        Some(bytes)
+    }
+}
+
+#[cfg(not(windows))]
+fn gdi_capture_webp() -> Option<Vec<u8>> {
+    None
 }
 
 // ── Opt-in input listener ───────────────────────────────────────────────────

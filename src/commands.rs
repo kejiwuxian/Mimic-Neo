@@ -604,7 +604,7 @@ pub fn selftest_record() {
     crate::log::line("selftest_record: begin");
     let options = RecordOptions {
         mode: Mode::Sai,
-        compression: CompressionOptions { lossy: true, quality: 70, max_dim: Some(640), crop_focus: false },
+        compression: CompressionOptions { lossy: true, quality: 60, max_dim: Some(384), crop_focus: false },
         fps: 6.0,
         history_secs: 4,
     };

@@ -164,7 +164,10 @@ impl RecorderState {
                 self.stats.add_shot(bytes.len(), enc.bytes.len());
                 enc.data_url()
             }
-            None => String::new(),
+            None => {
+                crate::log::line("shot: MISSING (no frame from ring buffer or GDI)");
+                String::new()
+            }
         };
         Capture { capture, focused }
     }
