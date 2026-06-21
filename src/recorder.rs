@@ -13,7 +13,7 @@
 //! Nothing is sent anywhere without passing the local review gate first.
 
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::sync::Arc;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -385,6 +385,10 @@ impl RecorderState {
         self.flush_scroll(now, None);
         self.flush_press(now, None);
     }
+
+    fn action_count(&self) -> usize {
+        self.actions.len()
+    }
 }
 
 // ── Recording driver (worker thread) ─────────────────────────────────────────
@@ -401,32 +405,42 @@ pub struct RecorderOutput {
 /// Start the capture pipeline on a background thread. Returns a join handle that
 /// yields the recorded actions + compression stats once `stop` is set.
 ///
-/// `overlay_hwnd` is the float control window's HWND (as isize); input events
-/// targeting it are dropped so operating the overlay isn't recorded.
+/// `overlay_hwnd` holds the float control window's HWND (as isize), shared so it
+/// can be populated *after* the worker starts (recording does not wait on the
+/// overlay). `0` means "no overlay yet" — input filtering is simply skipped.
 pub fn start_worker(
     opts: RecordOptions,
     stop: Arc<AtomicBool>,
-    overlay_hwnd: isize,
+    overlay_hwnd: Arc<AtomicIsize>,
 ) -> JoinHandle<RecorderOutput> {
     std::thread::spawn(move || run_worker(opts, stop, overlay_hwnd))
 }
 
-fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: isize) -> RecorderOutput {
+fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: Arc<AtomicIsize>) -> RecorderOutput {
     let started_ms = epoch_ms();
     let recording_start = SystemTime::now();
+    crate::log::line(&format!(
+        "worker: started (fps={}, history={}s, mode={:?})",
+        opts.fps, opts.history_secs, opts.mode
+    ));
 
     // Ring-buffer frame pump (best-effort) + global input listener.
     let primary = capture::get_primary_screen();
-    let _ = capture::start_recording(
+    match capture::start_recording(
         &primary,
         Duration::from_secs(opts.history_secs.max(1)),
         opts.fps.max(1.0),
-    );
+    ) {
+        Ok(()) => crate::log::line("worker: ring-buffer recorder started"),
+        Err(e) => crate::log::line(&format!("worker: ring-buffer start error: {e}")),
+    }
     let event_rx = capture::spawn_listener();
+    crate::log::line("worker: input listener spawned; capturing");
 
     let mut state = RecorderState::new(opts.compression.clone(), recording_start);
     // Last known cursor (rdev button/wheel events carry no coords) for overlay hit-testing.
     let mut cursor = (0.0f64, 0.0f64);
+    let mut last_logged = 0usize;
 
     loop {
         match event_rx.recv_timeout(DEBOUNCE_DELAY) {
@@ -434,15 +448,25 @@ fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: isize) -
                 if let EventType::MouseMove { x, y } = &event.event_type {
                     cursor = (*x, *y);
                 }
-                if overlay::event_targets_overlay(&event, overlay_hwnd, cursor) {
+                if overlay::event_targets_overlay(&event, overlay_hwnd.load(Ordering::SeqCst), cursor) {
                     continue; // ignore the overlay's own Stop click / drag / typing
                 }
                 state.handle(event);
+                let n = state.action_count();
+                if n != last_logged {
+                    crate::log::line(&format!("worker: captured action #{n}"));
+                    last_logged = n;
+                }
             }
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
                 let now = SystemTime::now();
                 state.flush_typing(now, None);
                 state.flush_scroll(now, None);
+                let n = state.action_count();
+                if n != last_logged {
+                    crate::log::line(&format!("worker: captured action #{n}"));
+                    last_logged = n;
+                }
                 if stop.load(Ordering::SeqCst) {
                     break;
                 }
@@ -455,6 +479,11 @@ fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: isize) -
 
     let ended_ms = epoch_ms();
     let RecorderState { actions, stats, .. } = state;
+    crate::log::line(&format!(
+        "worker: finishing, {} action(s), {} captures",
+        actions.len(),
+        stats.shots
+    ));
     RecorderOutput {
         actions,
         stats,

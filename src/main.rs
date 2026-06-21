@@ -14,6 +14,7 @@ mod capture;
 mod commands;
 mod compress;
 mod export;
+mod log;
 mod overlay;
 mod recorder;
 mod review;
@@ -21,6 +22,13 @@ mod tasks;
 mod telegram;
 
 fn main() {
+    // Headless self-test of the capture→compress→export→meta pipeline (no GUI),
+    // so the token metrics can be verified without driving the UI.
+    if std::env::args().any(|a| a == "--selftest") {
+        commands::selftest();
+        return;
+    }
+
     tauri::Builder::default()
         .manage(commands::AppState::default())
         .invoke_handler(tauri::generate_handler![

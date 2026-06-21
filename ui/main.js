@@ -14,7 +14,8 @@ function toast(msg) {
 
 function setRecording(on) {
   $("recIndicator").classList.toggle("hidden", !on);
-  $("startBtn").disabled = on;
+  $("startBtn").classList.toggle("hidden", on);
+  $("stopBtn").classList.toggle("hidden", !on);
 }
 
 function pct(ratio) {
@@ -82,6 +83,11 @@ async function startRecording() {
   catch (e) { toast(e); }
 }
 
+async function stopRecording() {
+  try { await invoke("stop_recording"); }
+  catch (e) { toast(e); }
+}
+
 async function runTask(id) {
   try { await invoke("run_task", { id }); }
   catch (e) { toast(e); }
@@ -142,6 +148,7 @@ function hideReplay() { $("replayOverlay").classList.add("hidden"); }
 
 // Wire events
 $("startBtn").onclick = startRecording;
+$("stopBtn").onclick = stopRecording;
 $("refreshBtn").onclick = refreshTasks;
 $("modalClose").onclick = () => $("modal").classList.add("hidden");
 

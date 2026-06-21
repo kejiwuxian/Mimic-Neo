@@ -1,6 +1,6 @@
 //! Tauri command layer: recording control, task library management, and replay.
 
-use std::sync::atomic::{AtomicBool, Ordering::SeqCst};
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering::SeqCst};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::time::Duration;
@@ -70,21 +70,44 @@ pub struct TelegramStatus {
 
 // ── Float overlay window ─────────────────────────────────────────────────────
 
-fn ensure_float_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+/// Logical top-right position for the float overlay (small margin from the edge).
+fn float_position(app: &AppHandle) -> (f64, f64) {
+    const W: f64 = 160.0;
+    const MARGIN: f64 = 24.0;
+    if let Some(main) = app.get_webview_window("main") {
+        if let Ok(Some(m)) = main.primary_monitor() {
+            let scale = m.scale_factor();
+            let logical_w = m.size().width as f64 / scale;
+            let x = (logical_w - W - MARGIN).max(0.0);
+            return (x, MARGIN);
+        }
+    }
+    (80.0, 80.0)
+}
+
+/// Create (or reuse) and show the float overlay window. Built with an explicit
+/// size *and* position so it never collapses to the 0,0 corner.
+fn open_and_show_float(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     if let Some(w) = app.get_webview_window("float") {
+        let _ = w.show();
         return Ok(w);
     }
-    WebviewWindowBuilder::new(app, "float", WebviewUrl::App("float.html".into()))
+    let (x, y) = float_position(app);
+    let w = WebviewWindowBuilder::new(app, "float", WebviewUrl::App("float.html".into()))
         .title("Sai Recorder - Recording")
         .inner_size(160.0, 48.0)
+        .position(x, y)
         .resizable(false)
         .decorations(false)
         .skip_taskbar(true)
         .always_on_top(true)
         .content_protected(true)
-        .visible(false)
         .focusable(false)
-        .build()
+        .visible(true)
+        .build()?;
+    let _ = w.show();
+    let _ = w.set_always_on_top(true);
+    Ok(w)
 }
 
 #[cfg(windows)]
@@ -99,8 +122,7 @@ fn window_hwnd_isize(_w: &WebviewWindow) -> isize {
 
 #[tauri::command]
 pub async fn open_float_window(app: AppHandle) -> Result<(), String> {
-    let w = ensure_float_window(&app).map_err(|e| e.to_string())?;
-    w.show().map_err(|e| e.to_string())?;
+    open_and_show_float(&app).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -112,35 +134,101 @@ pub fn start_recording(
     state: State<'_, AppState>,
     opts: RecordOptionsDto,
 ) -> Result<(), String> {
+    crate::log::line("start_recording invoked");
+
     if state.replaying.load(SeqCst) {
+        crate::log::line("start_recording: rejected (replay in progress)");
         return Err("A replay is in progress.".into());
     }
     if state.rec.lock().unwrap().is_some() {
+        crate::log::line("start_recording: rejected (already recording)");
         return Err("Already recording.".into());
     }
 
     let options = opts.into_options();
+    crate::log::line(&format!(
+        "options: mode={:?} fps={} history={}s crop={} lossy={} quality={} max_dim={:?}",
+        options.mode,
+        options.fps,
+        options.history_secs,
+        options.compression.crop_focus,
+        options.compression.lossy,
+        options.compression.quality,
+        options.compression.max_dim
+    ));
 
-    // Float control window: show it and grab its HWND so its own input is ignored.
-    let w = ensure_float_window(&app).map_err(|e| e.to_string())?;
-    let _ = w.show();
-    let hwnd = window_hwnd_isize(&w);
-
+    // Spawn the capture worker FIRST so recording starts regardless of the
+    // overlay. The HWND is shared and filled in once the overlay exists.
     let stop = Arc::new(AtomicBool::new(false));
-    let worker = recorder::start_worker(options.clone(), stop.clone(), hwnd);
+    let overlay_hwnd = Arc::new(AtomicIsize::new(0));
+    let worker = recorder::start_worker(options.clone(), stop.clone(), overlay_hwnd.clone());
+    crate::log::line("worker spawned");
 
     *state.rec.lock().unwrap() = Some(Session { stop, options, worker });
     let _ = app.emit("recording-started", ());
+
+    // Open the float overlay (NON-FATAL): failures are logged but never abort
+    // the recording. On success, publish its HWND for input filtering.
+    crate::log::line("opening float window");
+    match open_and_show_float(&app) {
+        Ok(w) => {
+            let h = window_hwnd_isize(&w);
+            overlay_hwnd.store(h, SeqCst);
+            crate::log::line(&format!("float window result: ok (hwnd={h})"));
+        }
+        Err(e) => {
+            crate::log::line(&format!("float window result: err: {e}"));
+        }
+    }
     Ok(())
 }
 
 #[tauri::command]
 pub fn stop_recording(app: AppHandle, state: State<'_, AppState>) -> Result<TaskMeta, String> {
-    let session = state.rec.lock().unwrap().take().ok_or("Not recording.")?;
+    crate::log::line("stop invoked");
+    let session = match state.rec.lock().unwrap().take() {
+        Some(s) => s,
+        None => {
+            crate::log::line("stop: rejected (not recording)");
+            return Err("Not recording.".into());
+        }
+    };
     session.stop.store(true, SeqCst);
-    let output = session.worker.join().map_err(|_| "Recorder thread panicked.")?;
+    let output = match session.worker.join() {
+        Ok(o) => o,
+        Err(_) => {
+            crate::log::line("stop: worker thread panicked");
+            return Err("Recorder thread panicked.".into());
+        }
+    };
+    crate::log::line(&format!(
+        "worker joined: {} actions, {} captures, baseline={}B compressed={}B",
+        output.actions.len(),
+        output.stats.shots,
+        output.stats.baseline_bytes,
+        output.stats.compressed_bytes
+    ));
 
-    let meta = tasks::save_recording(&output, &session.options).map_err(|e| e.to_string())?;
+    let meta = match tasks::save_recording(&output, &session.options) {
+        Ok(m) => m,
+        Err(e) => {
+            crate::log::line(&format!("export error: {e}"));
+            // Still close the overlay so the UI isn't stuck.
+            if let Some(w) = app.get_webview_window("float") {
+                let _ = w.close();
+            }
+            return Err(e.to_string());
+        }
+    };
+    crate::log::line(&format!(
+        "task saved {} -> {} | tokens baseline={} compressed={} ratio={} | size ratio={}",
+        meta.id,
+        meta.name,
+        meta.compression.get("baselineTokensEst").cloned().unwrap_or_default(),
+        meta.compression.get("compressedTokensEst").cloned().unwrap_or_default(),
+        meta.compression.get("tokenRatio").cloned().unwrap_or_default(),
+        meta.compression.get("sizeRatio").cloned().unwrap_or_default()
+    ));
 
     if let Some(w) = app.get_webview_window("float") {
         let _ = w.close();
@@ -401,4 +489,93 @@ fn char_to_key(ch: char) -> Option<(Key, bool)> {
         _ => None,
     };
     shifted.map(|k| (k, true))
+}
+
+// ── Headless self-test ───────────────────────────────────────────────────────
+
+/// Exercises the real compress → export → meta path without the GUI and logs
+/// the resulting token metrics. Invoked via `sai-recorder.exe --selftest`.
+pub fn selftest() {
+    use image::{ColorType, ImageEncoder};
+
+    crate::log::line("selftest: begin");
+
+    // Synthetic high-entropy frame (noise) at a realistic resolution, encoded to
+    // lossless WebP exactly like the ring buffer — so the baseline is sizable and
+    // the lossy+downscaled output shows real savings (like a true screenshot).
+    let img = image::RgbaImage::from_fn(1280, 800, |x, y| {
+        let h = x
+            .wrapping_mul(2_654_435_761)
+            ^ y.wrapping_mul(40_503)
+            ^ x.wrapping_add(y).wrapping_mul(2_246_822_519);
+        image::Rgba([(h & 0xff) as u8, ((h >> 8) & 0xff) as u8, ((h >> 16) & 0xff) as u8, 255])
+    });
+    let mut baseline = Vec::new();
+    if image::codecs::webp::WebPEncoder::new_lossless(&mut baseline)
+        .write_image(img.as_raw(), img.width(), img.height(), ColorType::Rgba8.into())
+        .is_err()
+    {
+        crate::log::line("selftest: webp encode failed");
+        println!("SELFTEST FAIL: webp encode");
+        return;
+    }
+
+    let options = RecordOptions {
+        mode: Mode::Sai,
+        compression: CompressionOptions { lossy: true, quality: 70, max_dim: Some(256), crop_focus: false },
+        fps: 10.0,
+        history_secs: 10,
+    };
+
+    // Real compression of a few captures.
+    let mut stats = crate::compress::CompressionStats::default();
+    let mut sample_url = String::new();
+    for _ in 0..3 {
+        let enc = crate::compress::compress_frame(&baseline, None, &options.compression);
+        stats.add_shot(baseline.len(), enc.bytes.len());
+        sample_url = enc.data_url();
+    }
+
+    let mk_cap = || crate::actions::Capture {
+        capture: sample_url.clone(),
+        focused: crate::actions::Focused {
+            window: None,
+            screen: crate::capture::FocusedScreenMetadata {
+                id: None, name: None, x: None, y: None, width: None, height: None, primary: None,
+            },
+        },
+    };
+    let mut actions = Vec::new();
+    for i in 0..2u64 {
+        actions.push(UserAction::Click {
+            base: crate::actions::BaseAction {
+                timestamp: (i * 100) as f64,
+                duration: 10.0,
+                before: mk_cap(),
+                after: mk_cap(),
+            },
+            button: Button::Left,
+            coordinate: crate::actions::Coordinate { x: 10.0, y: 20.0 },
+            keys: None,
+        });
+    }
+
+    let output = RecorderOutput {
+        actions,
+        stats,
+        started_ms: 0,
+        ended_ms: 1000,
+        duration_ms: 1000,
+    };
+
+    match tasks::save_recording(&output, &options) {
+        Ok(meta) => {
+            crate::log::line(&format!("selftest: task saved {} | compression={}", meta.id, meta.compression));
+            println!("SELFTEST OK task={} compression={}", meta.id, meta.compression);
+        }
+        Err(e) => {
+            crate::log::line(&format!("selftest: save error: {e}"));
+            println!("SELFTEST FAIL: {e}");
+        }
+    }
 }
