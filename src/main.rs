@@ -34,6 +34,24 @@ fn main() {
         return;
     }
 
+    // Offline compression measurement: --measure <FRAMES_DIR>
+    {
+        let argv: Vec<String> = std::env::args().collect();
+        if let Some(pos) = argv.iter().position(|a| a == "--measure") {
+            let dir = argv.get(pos + 1).cloned().unwrap_or_else(|| {
+                eprintln!("--measure requires a directory argument");
+                std::process::exit(1);
+            });
+            match compress::measure_sweep(std::path::Path::new(&dir)) {
+                Ok(_) => std::process::exit(0),
+                Err(e) => {
+                    eprintln!("measure failed: {e}");
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+
     tauri::Builder::default()
         .manage(commands::AppState::default())
         .invoke_handler(tauri::generate_handler![

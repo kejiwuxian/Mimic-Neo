@@ -1,8 +1,17 @@
 name: CI (Windows build)
 
-# Builds Mimic Neo (crate: sai-recorder) for Windows on every push/PR, runs the
-# headless pipeline smoke test, and uploads the runnable exe as an artifact.
-# Tag pushes (v*) additionally publish a GitHub Release with the exe + MSI installer.
+# Builds Mimic Neo (crate: sai-recorder) for Windows on every push/PR.
+#
+#   build  -> compiles the release exe and uploads it as an artifact
+#   test   -> downloads that exact exe artifact and exercises it:
+#               * --selftest : headless capture -> compress -> encode pipeline
+#               * --measure  : real compression benchmark over bench/frames
+#             then uploads measure-results.json
+#   release-> publishes the exe (+ bundles) on v* tags
+#
+# The test job consumes the *uploaded artifact* rather than rebuilding, so we
+# verify the exact binary that ships. The benchmark frames in bench/frames are
+# real 1920x1080 screenshots, making the compression numbers reproducible in CI.
 
 on:
   push:
@@ -12,23 +21,25 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
-# Cancel superseded runs on the same ref to save CI minutes.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write # needed by the release job to attach assets
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  ARTIFACT_NAME: mimic-neo-windows-x64
 
 jobs:
   build:
-    name: Build & smoke test (windows-latest)
+    name: Build release exe
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Rust (stable MSVC)
+      - name: Install Rust (stable, MSVC)
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
@@ -36,36 +47,66 @@ jobs:
       - name: Cache cargo + target
         uses: Swatinem/rust-cache@v2
         with:
-          # Keep the cache keyed to the manifest so dependency bumps invalidate it.
           key: windows-msvc
 
-      # WebView2 runtime is preinstalled on windows-latest runners, so no extra
-      # setup is required to compile the Tauri frontend assets into the binary.
       - name: Build (release)
         run: cargo build --release --locked
-
-      - name: Smoke test (headless pipeline selftest)
-        # --selftest synthesizes a task end-to-end and exits 0 on success.
-        run: .\target\release\sai-recorder.exe --selftest
 
       - name: Upload exe artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mimic-neo-windows-x64
+          name: ${{ env.ARTIFACT_NAME }}
           path: target/release/sai-recorder.exe
+          if-no-files-found: error
+          retention-days: 30
+
+  test:
+    name: Test (uses build artifact)
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (for bench/frames fixture)
+        uses: actions/checkout@v4
+
+      - name: Download exe artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: bin
+
+      - name: Headless pipeline smoke test (--selftest)
+        run: .\bin\sai-recorder.exe --selftest
+
+      - name: Compression benchmark (--measure bench/frames)
+        run: .\bin\sai-recorder.exe --measure bench/frames
+
+      - name: Show measurement summary
+        if: always()
+        run: |
+          if (Test-Path measure-results.json) {
+            Get-Content measure-results.json -Raw
+          } else {
+            Write-Error "measure-results.json was not produced"
+          }
+
+      - name: Upload measurement results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: measure-results
+          path: measure-results.json
           if-no-files-found: error
           retention-days: 30
 
   release:
     name: Publish release (tags only)
-    needs: build
+    needs: [build, test]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Rust (stable MSVC)
+      - name: Install Rust (stable, MSVC)
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
@@ -75,14 +116,10 @@ jobs:
         with:
           key: windows-msvc
 
-      - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^2" --locked
+      - name: Build release + bundles
+        run: cargo build --release --locked
 
-      # Produces the bare exe + bundled MSI/NSIS installers under target/release.
-      - name: Build bundle
-        run: cargo tauri build
-
-      - name: Publish GitHub Release
+      - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
           files: |
