@@ -235,28 +235,28 @@
 <span class="material-symbols-outlined text-[18px]">video_library</span>
 <span class="text-label-md font-label-md uppercase tracking-wider">Total Recordings</span>
 </div>
-<div class="text-headline-lg font-headline-lg text-on-surface">124</div>
+<div class="text-headline-lg font-headline-lg text-on-surface" id="stat-total">0</div>
 </div>
 <div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
 <div class="flex items-center gap-2 text-on-surface-variant">
 <span class="material-symbols-outlined text-[18px]">timer</span>
 <span class="text-label-md font-label-md uppercase tracking-wider">Time Captured</span>
 </div>
-<div class="text-headline-lg font-headline-lg text-on-surface">42h <span class="text-headline-md text-on-surface-variant">15m</span></div>
+<div class="text-headline-lg font-headline-lg text-on-surface" id="stat-time">0m</div>
 </div>
 <div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
 <div class="flex items-center gap-2 text-on-surface-variant">
 <span class="material-symbols-outlined text-[18px]">data_usage</span>
 <span class="text-label-md font-label-md uppercase tracking-wider">Tokens Saved</span>
 </div>
-<div class="text-headline-lg font-headline-lg text-on-surface">1.2M</div>
+<div class="text-headline-lg font-headline-lg text-on-surface" id="stat-tokens">0</div>
 </div>
 <div class="glass-panel rounded-xl p-5 border border-outline-variant/20 flex flex-col gap-2">
 <div class="flex items-center gap-2 text-on-surface-variant">
 <span class="material-symbols-outlined text-[18px]">compress</span>
 <span class="text-label-md font-label-md uppercase tracking-wider">Avg Compression</span>
 </div>
-<div class="text-headline-lg font-headline-lg text-on-surface text-tertiary">85%</div>
+<div class="text-headline-lg font-headline-lg text-on-surface text-tertiary" id="stat-comp">—</div>
 </div>
 </section>
 <!-- Recent Activity Table -->
@@ -280,7 +280,7 @@
 <th class="py-3 px-4 text-label-md font-label-md text-on-surface-variant uppercase tracking-wider w-[80px] text-right">Play</th>
 </tr>
 </thead>
-<tbody class="text-body-md font-body-md divide-y divide-outline-variant/10">
+<tbody class="text-body-md font-body-md divide-y divide-outline-variant/10" id="recent-tbody">
 <tr class="table-row-hover transition-colors group">
 <td class="py-3 px-4">
 <div class="w-16 h-10 rounded bg-surface-container-highest overflow-hidden border border-outline-variant/20">

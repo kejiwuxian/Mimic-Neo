@@ -10,11 +10,11 @@
     "windows": [
       {
         "label": "main",
-        "title": "Sai Recorder",
-        "width": 940,
-        "height": 700,
-        "minWidth": 720,
-        "minHeight": 520,
+        "title": "Mimic Neo",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 1024,
+        "minHeight": 640,
         "resizable": true
       }
     ],

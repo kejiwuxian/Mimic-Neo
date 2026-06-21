@@ -28,6 +28,10 @@
   function fmtClock(ms){ var s=Math.floor((Number(ms)||0)/1000); var h=Math.floor(s/3600); var m=Math.floor((s%3600)/60); var ss=s%60; function p(n){ return (n<10?"0":"")+n; } return (h>0? h+":" : "")+p(m)+":"+p(ss); }
   function fmtDur(ms){ var s=Math.floor((Number(ms)||0)/1000); var m=Math.floor(s/60); return m+"m "+(s%60)+"s"; }
   function fmtDate(v){ try{ var d=new Date(v); return isNaN(d.getTime())? String(v) : d.toLocaleString(); }catch(e){ return String(v); } }
+  function fmtBytes(n){ n=Number(n)||0; if(n<1024) return n+" B"; if(n<1048576) return (n/1024).toFixed(1)+" KB"; if(n<1073741824) return (n/1048576).toFixed(1)+" MB"; return (n/1073741824).toFixed(2)+" GB"; }
+  function fmtCount(n){ n=Number(n)||0; if(n<1000) return String(Math.round(n)); if(n<1e6) return (n/1e3).toFixed(n<1e4?1:0).replace(/\.0$/,"")+"K"; return (n/1e6).toFixed(n<1e7?2:1).replace(/\.0$/,"")+"M"; }
+  function fmtHm(ms){ var s=Math.floor((Number(ms)||0)/1000); var h=Math.floor(s/3600); var m=Math.floor((s%3600)/60); if(h>0) return h+"h "+m+"m"; var ss=s%60; return m+"m "+ss+"s"; }
+  function comp(t){ var c=(t&&t.compression)||{}; return (typeof c==="object"&&c)?c:{}; }
   function findTimerEl(){ return $all("span,div,p").find(function(e){ return e.children.length===0 && /^\s*\d{1,2}:\d{2}(:\d{2})?\s*$/.test(e.textContent||""); }); }
   function startTimer(){
     var start=Number(localStorage.getItem("recStart"));
@@ -75,7 +79,97 @@
 
   async function pgDashboard(){
     wireNav(); wireStartButtons();
-    try{ var ts=await inv("list_tasks")||[]; console.log("tasks:", ts.length); }catch(e){ console.warn(e); }
+    var tasks=[];
+    try{ tasks=await inv("list_tasks")||[]; }catch(e){ console.warn(e); return; }
+
+    // ---- summary stats ----
+    var totalMs=0, baseTok=0, compTok=0, ratioSum=0, ratioN=0;
+    tasks.forEach(function(t){
+      totalMs+=Number(t.duration_ms)||0;
+      var c=comp(t);
+      baseTok+=Number(c.baselineTokensEst)||0;
+      compTok+=Number(c.compressedTokensEst)||0;
+      var b=Number(c.baselineTokensEst)||0;
+      if(b>0){ ratioSum+=(1-(Number(c.compressedTokensEst)||0)/b); ratioN++; }
+    });
+    var elTotal=document.getElementById("stat-total"); if(elTotal) elTotal.textContent=String(tasks.length);
+    var elTime=document.getElementById("stat-time"); if(elTime) elTime.textContent=fmtHm(totalMs);
+    var elTok=document.getElementById("stat-tokens"); if(elTok) elTok.textContent=fmtCount(Math.max(0, baseTok-compTok));
+    var elComp=document.getElementById("stat-comp"); if(elComp) elComp.textContent=ratioN? Math.round(100*ratioSum/ratioN)+"%" : "—";
+
+    // ---- recent activity (most recent first) ----
+    var tbody=document.getElementById("recent-tbody");
+    if(!tbody) return;
+    var recent=tasks.slice().sort(function(a,b){ return (new Date(b.created)-new Date(a.created))||0; }).slice(0,5);
+    tbody.innerHTML="";
+    if(!recent.length){
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td class="py-8 px-4 text-center text-on-surface-variant" colspan="6">No recordings yet. Start one above.</td>';
+      tbody.appendChild(tr); return;
+    }
+    recent.forEach(function(t){
+      var c=comp(t);
+      var tr=document.createElement("tr");
+      tr.className="table-row-hover transition-colors group cursor-pointer";
+      tr.innerHTML=
+        '<td class="py-3 px-4"><div class="w-16 h-10 rounded bg-surface-container-highest border border-outline-variant/20 flex items-center justify-center text-on-surface-variant">'
+          +'<span class="material-symbols-outlined text-[18px]">'+(t.mode==="dataset"?"dataset":"smart_toy")+'</span></div></td>'
+        +'<td class="py-3 px-4 font-medium text-on-surface"></td>'
+        +'<td class="py-3 px-4 text-on-surface-variant font-mono-label">'+fmtDur(t.duration_ms)+'</td>'
+        +'<td class="py-3 px-4 text-on-surface-variant">'+(Number(t.action_count)||0)+' steps</td>'
+        +'<td class="py-3 px-4 text-on-surface-variant">'+fmtBytes(c.compressedBytes)+'</td>'
+        +'<td class="py-3 px-4 text-right"><button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/20 hover:scale-110 ml-auto" title="Replay"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: \'FILL\' 1;">play_arrow</span></button></td>';
+      tr.children[1].textContent=t.name||t.id;
+      tr.addEventListener("click", function(e){ if(e.target.closest("button")) return; go("task-detail.html?id="+esc(t.id)); });
+      var play=tr.querySelector("button");
+      if(play) play.addEventListener("click", function(e){ e.stopPropagation(); go("replay.html?id="+esc(t.id)); });
+      tbody.appendChild(tr);
+    });
+    var viewAll=byText("button","view all"); if(viewAll) viewAll.addEventListener("click", function(){ go("library.html"); });
+  }
+
+  async function pgCompression(){
+    wireNav();
+    var tasks=[];
+    try{ tasks=await inv("list_tasks")||[]; }catch(e){ console.warn(e); return; }
+    var withC=tasks.filter(function(t){ return (Number(comp(t).baselineTokensEst)||0)>0; });
+
+    // ---- aggregate hero ratio ----
+    var baseTok=0, compTok=0;
+    withC.forEach(function(t){ var c=comp(t); baseTok+=Number(c.baselineTokensEst)||0; compTok+=Number(c.compressedTokensEst)||0; });
+    var ratio=(compTok>0)? baseTok/compTok : 0;
+    var elR=document.getElementById("comp-ratio");
+    if(elR) elR.textContent= ratio>0 ? (ratio>=10?Math.round(ratio):ratio.toFixed(1))+"x" : "—";
+
+    // ---- proportional bars (Sai relative to standard baseline) ----
+    var sai=document.getElementById("comp-bar-sai");
+    if(sai){ var pct=ratio>0? Math.max(2, Math.min(100, 100/ratio)) : 100; sai.style.height=pct.toFixed(1)+"%"; }
+
+    // ---- per-recording table ----
+    var title=document.getElementById("comp-table-title");
+    if(title) title.textContent="Token Accumulation ("+withC.length+" recording"+(withC.length===1?"":"s")+")";
+    var tbody=document.getElementById("comp-tbody");
+    if(!tbody) return;
+    tbody.innerHTML="";
+    if(!withC.length){
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td class="py-8 text-center text-on-surface-variant" colspan="4">No compression data yet — record a task to populate.</td>';
+      tbody.appendChild(tr); return;
+    }
+    withC.slice().sort(function(a,b){ return (new Date(b.created)-new Date(a.created))||0; }).slice(0,12).forEach(function(t){
+      var c=comp(t);
+      var b=Number(c.baselineTokensEst)||0, cm=Number(c.compressedTokensEst)||0;
+      var saved=b>0? Math.round(100*(1-cm/b)) : 0;
+      var tr=document.createElement("tr");
+      tr.className="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors";
+      tr.innerHTML=
+        '<td class="py-3 text-on-surface-variant"></td>'
+        +'<td class="py-3 text-error-container">'+fmtCount(b)+' tok ('+fmtBytes(c.baselineBytes)+')</td>'
+        +'<td class="py-3 text-primary">'+(Number(c.shots)||0)+' frames · '+fmtCount(cm)+' tok</td>'
+        +'<td class="py-3 text-right text-surface-tint font-bold">~ '+saved+'%</td>';
+      tr.children[0].textContent=t.name||t.id;
+      tbody.appendChild(tr);
+    });
   }
 
   function pgSetup(){
@@ -258,7 +352,7 @@
         case "library.html": pgLibrary(); break;
         case "replay.html": pgReplay(); break;
         case "export.html": pgExport(); break;
-        case "compression.html": wireNav(); break;
+        case "compression.html": pgCompression(); break;
         case "settings.html": pgSettings(); break;
         case "states.html": pgStates(); break;
         default: wireNav(); wireStartButtons();

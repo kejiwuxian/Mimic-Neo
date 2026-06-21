@@ -321,8 +321,8 @@
 <div class="col-span-12 lg:col-span-4 flex flex-col justify-center items-center text-center p-8 relative">
 <!-- Abstract connection lines background could go here, simplified with CSS for now -->
 <div class="absolute w-[200%] h-[200%] rounded-full bg-primary/5 blur-[100px] -z-10"></div>
-<div class="text-[64px] font-headline-xl font-bold text-primary-container leading-none tracking-tighter mb-4" style="text-shadow: 0 0 40px rgba(77, 142, 255, 0.4);">
-                        8.4x
+<div class="text-[64px] font-headline-xl font-bold text-primary-container leading-none tracking-tighter mb-4" style="text-shadow: 0 0 40px rgba(77, 142, 255, 0.4);" id="comp-ratio">
+                        —
                     </div>
 <div class="text-headline-md font-headline-md text-on-surface mb-8">
                         More Efficient
@@ -330,11 +330,11 @@
 <div class="w-full h-32 glass-panel rounded-lg flex items-end p-4 gap-2">
 <!-- Simulated bar chart comparing data weight -->
 <div class="w-1/2 flex flex-col items-center justify-end h-full gap-2 group">
-<div class="w-full bg-outline-variant/40 rounded-t-sm h-[90%] transition-all"></div>
+<div class="w-full bg-outline-variant/40 rounded-t-sm h-[90%] transition-all" id="comp-bar-std"></div>
 <span class="text-label-sm text-outline group-hover:text-on-surface transition-colors">Standard</span>
 </div>
 <div class="w-1/2 flex flex-col items-center justify-end h-full gap-2 group">
-<div class="w-full bg-primary-container rounded-t-sm h-[12%] shadow-[0_0_15px_rgba(77,142,255,0.5)] transition-all"></div>
+<div class="w-full bg-primary-container rounded-t-sm h-[12%] shadow-[0_0_15px_rgba(77,142,255,0.5)] transition-all" id="comp-bar-sai"></div>
 <span class="text-label-sm text-primary group-hover:text-primary-container transition-colors">Sai Frame</span>
 </div>
 </div>
@@ -397,7 +397,7 @@
 <!-- Bottom Data Table / Tokens Saved Visualization -->
 <div class="max-w-7xl mx-auto mt-lg glass-panel rounded-xl p-6">
 <div class="flex justify-between items-center mb-4">
-<h4 class="text-headline-md font-headline-md text-on-surface">Token Accumulation (10s Session)</h4>
+<h4 class="text-headline-md font-headline-md text-on-surface" id="comp-table-title">Token Accumulation</h4>
 <button class="text-label-md text-primary flex items-center gap-1 hover:underline">
                         View Raw Logs <span class="material-symbols-outlined text-[16px]">open_in_new</span>
 </button>
@@ -406,13 +406,13 @@
 <table class="w-full text-left border-collapse min-w-[800px]">
 <thead>
 <tr class="border-b border-outline-variant/50 text-label-md text-outline">
-<th class="pb-2 font-medium w-[150px]">Time Range</th>
-<th class="pb-2 font-medium w-[200px]">Standard System Data</th>
-<th class="pb-2 font-medium w-[200px]">Sai Active Frames</th>
+<th class="pb-2 font-medium w-[260px]">Recording</th>
+<th class="pb-2 font-medium w-[200px]">Baseline (1 fps lossless)</th>
+<th class="pb-2 font-medium w-[200px]">Sai Keyframes</th>
 <th class="pb-2 font-medium text-right">Tokens Saved</th>
 </tr>
 </thead>
-<tbody class="text-body-md font-mono-label">
+<tbody class="text-body-md font-mono-label" id="comp-tbody">
 <tr class="border-b border-outline-variant/20 hover:bg-surface-variant/30 transition-colors">
 <td class="py-3 text-on-surface-variant">0.0s - 2.0s</td>
 <td class="py-3 text-error-container">120 frames (4.2 MB)</td>
