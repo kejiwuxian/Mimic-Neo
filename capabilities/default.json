@@ -1,0 +1,17 @@
+{
+  "identifier": "default",
+  "description": "Capability for the main and float windows.",
+  "windows": ["main", "float"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-create",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-set-focus",
+    "core:window:allow-start-dragging",
+    "core:webview:allow-create-webview-window",
+    "core:event:default"
+  ]
+}

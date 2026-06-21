@@ -1,31 +1,41 @@
-//! sai-recorder — opt-in record-and-replay workflow capture with token-efficient
-//! compression, MimicCLI-compatible output (`types/actions.d.ts`), for the
-//! Simular Sai agent and computer-use dataset collection.
+//! sai-recorder — Tauri v2 desktop app for opt-in record-and-replay workflow
+//! capture with token-efficient compression. MimicCLI-compatible action schema
+//! (`types/actions.d.ts`), for the Simular Sai agent and computer-use datasets.
 //!
-//! Pipeline: capture(ring buffer) → state machine → before/after captures →
-//! compress → export. An on-screen overlay controls start/stop.
+//! The GUI (main window) drives recording; a runtime float window shows the
+//! Stop control. The capture/compress/export engine is unchanged from the CLI
+//! version and reused as-is.
+
+// Hide the extra console window on Windows release builds.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod actions;
 mod capture;
-mod cli;
+mod commands;
 mod compress;
 mod export;
 mod overlay;
 mod recorder;
 mod review;
+mod tasks;
 mod telegram;
 
-use clap::Parser;
-
-use cli::{Cli, Command};
-
 fn main() {
-    let cli = Cli::parse();
-    let result = match cli.command {
-        Command::Record(args) => recorder::run(args.into_options()),
-    };
-    if let Err(e) = result {
-        eprintln!("error: {e:?}");
-        std::process::exit(1);
-    }
+    tauri::Builder::default()
+        .manage(commands::AppState::default())
+        .invoke_handler(tauri::generate_handler![
+            commands::open_float_window,
+            commands::start_recording,
+            commands::stop_recording,
+            commands::recording_state,
+            commands::list_tasks,
+            commands::get_task,
+            commands::rename_task,
+            commands::delete_task,
+            commands::run_task,
+            commands::get_telegram_status,
+            commands::send_task_telegram,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running sai-recorder");
 }

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recording</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+    body {
+      font: 12px -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-user-select: none; user-select: none;
+    }
+    .bar {
+      display: flex; align-items: center; gap: 8px;
+      height: 48px; width: 160px; padding: 0 10px; box-sizing: border-box;
+      background: #16181d; color: #e6e8ee;
+      border: 1px solid #2a2f3a; border-radius: 10px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff4040; animation: pulse 1s infinite; flex: 0 0 auto; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.25;} }
+    .timer { font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: .04em; }
+    .spacer { flex: 1; }
+    .stop {
+      cursor: pointer; border: none; border-radius: 7px;
+      background: #ff4040; color: white; font-weight: 700;
+      padding: 6px 10px; font-size: 12px;
+    }
+    .stop:hover { background: #e23636; }
+  </style>
+</head>
+<body>
+  <!-- The whole bar is a drag region except the Stop button. -->
+  <div class="bar" data-tauri-drag-region>
+    <span class="dot" data-tauri-drag-region></span>
+    <span class="timer" id="timer" data-tauri-drag-region>00:00</span>
+    <span class="spacer" data-tauri-drag-region></span>
+    <button class="stop" id="stop">Stop</button>
+  </div>
+  <script src="float.js"></script>
+</body>
+</html>

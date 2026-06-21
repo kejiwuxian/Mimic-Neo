@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sai Recorder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">●</span>
+      <div>
+        <h1>Sai Recorder</h1>
+        <p class="sub">Record workflows · compress · replay</p>
+      </div>
+    </div>
+    <div id="recIndicator" class="rec-indicator hidden">
+      <span class="dot"></span> Recording…
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>New recording</h2>
+      <div class="options">
+        <label>Mode
+          <select id="mode">
+            <option value="sai">Sai (inline)</option>
+            <option value="dataset">Dataset (JSONL)</option>
+          </select>
+        </label>
+        <label>FPS
+          <input id="fps" type="number" min="1" max="60" value="10" />
+        </label>
+        <label>History (s)
+          <input id="history" type="number" min="1" max="60" value="10" />
+        </label>
+        <label>Max dim (px)
+          <input id="maxDim" type="number" min="0" placeholder="off" />
+        </label>
+        <label class="check"><input id="crop" type="checkbox" /> Crop to focus</label>
+        <label class="check"><input id="lossy" type="checkbox" /> Lossy JPEG</label>
+        <label>Quality
+          <input id="quality" type="number" min="1" max="100" value="80" />
+        </label>
+      </div>
+      <div class="actions-row">
+        <button id="startBtn" class="primary">● Start Recording</button>
+        <span id="hint" class="hint">A floating Stop control will appear on screen.</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Task library</h2>
+        <button id="refreshBtn" class="ghost">Refresh</button>
+      </div>
+      <div id="taskList" class="task-list"></div>
+      <p id="emptyTasks" class="empty hidden">No recordings yet.</p>
+    </section>
+  </main>
+
+  <!-- Detail modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modalTitle">Task</h3>
+        <button id="modalClose" class="ghost">✕</button>
+      </div>
+      <div id="modalMeta" class="modal-meta"></div>
+      <pre id="modalPreview" class="preview"></pre>
+    </div>
+  </div>
+
+  <!-- Replay overlay -->
+  <div id="replayOverlay" class="replay-overlay hidden">
+    <div id="replayBig" class="replay-big">3</div>
+    <div id="replayMsg" class="replay-msg"></div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -10,19 +10,19 @@
 //! * The enum is internally tagged with `type` (`"Click"`, `"Type"`, …).
 
 use rdev::{Button, Key};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::capture::{FocusedScreenMetadata, FocusedWindowMetadata};
 
 /// Absolute screen coordinate.
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Coordinate {
     pub x: f64,
     pub y: f64,
 }
 
 /// Scroll direction (serializes as `"Up"`/`"Down"`/`"Left"`/`"Right"`).
-#[derive(Debug, Clone, Copy, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Direction {
     Up,
     Down,
@@ -31,7 +31,7 @@ pub enum Direction {
 }
 
 /// `focused: { window, screen }` — the focus context at capture time.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Focused {
     pub window: Option<FocusedWindowMetadata>,
     pub screen: FocusedScreenMetadata,
@@ -39,14 +39,14 @@ pub struct Focused {
 
 /// `Capture { capture, focused }`. `capture` is a `data:image/...;base64,...`
 /// URL in `sai` mode, or a relative `screenshots/...` path in `dataset` mode.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Capture {
     pub capture: String,
     pub focused: Focused,
 }
 
 /// Fields shared by every action. `timestamp` and `duration` are milliseconds.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BaseAction {
     /// Milliseconds from session start.
     pub timestamp: f64,
@@ -58,7 +58,7 @@ pub struct BaseAction {
 
 /// A high-level user action. Internally tagged by `type`, with [`BaseAction`]
 /// flattened in. Matches `UserAction` in `types/actions.d.ts`.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum UserAction {
     Hover {
@@ -124,6 +124,20 @@ pub enum UserAction {
 }
 
 impl UserAction {
+    /// Shared access to this action's base (timestamp/duration/captures).
+    pub fn base(&self) -> &BaseAction {
+        match self {
+            UserAction::Hover { base, .. }
+            | UserAction::Click { base, .. }
+            | UserAction::DoubleClick { base, .. }
+            | UserAction::TripleClick { base, .. }
+            | UserAction::Drag { base, .. }
+            | UserAction::Scroll { base, .. }
+            | UserAction::Type { base, .. }
+            | UserAction::Press { base, .. } => base,
+        }
+    }
+
     /// Mutable access to this action's base (used to backfill `after` captures).
     pub fn base_mut(&mut self) -> &mut BaseAction {
         match self {

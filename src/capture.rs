@@ -16,7 +16,7 @@ use std::sync::{LazyLock, Mutex};
 use std::time::{Duration, Instant};
 
 use rdev::Event;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use xcap::{
     image::{codecs::webp::WebPEncoder, ColorType, ImageEncoder},
     Monitor, VideoRecorder, Window,
@@ -24,7 +24,7 @@ use xcap::{
 
 // ── Metadata (camelCase to match types/actions.d.ts) ────────────────────────
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FocusedWindowMetadata {
     pub id: Option<u32>,
@@ -40,7 +40,7 @@ pub struct FocusedWindowMetadata {
     pub maximized: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FocusedScreenMetadata {
     pub id: Option<u32>,

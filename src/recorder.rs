@@ -13,10 +13,11 @@
 //! Nothing is sent anywhere without passing the local review gate first.
 
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use anyhow::Result;
 use rdev::{Button, Event, EventType, Key};
 
 use crate::actions::{
@@ -25,10 +26,7 @@ use crate::actions::{
 };
 use crate::capture;
 use crate::compress::{CompressionOptions, CompressionStats};
-use crate::export;
-use crate::overlay::{self, Shared};
-use crate::review;
-use crate::telegram;
+use crate::overlay;
 
 // ── Tuning (from new_record.rs) ──────────────────────────────────────────────
 const DEBOUNCE_DELAY: Duration = Duration::from_millis(800);
@@ -46,7 +44,6 @@ pub enum Mode {
 #[derive(Debug, Clone)]
 pub struct RecordOptions {
     pub mode: Mode,
-    pub out_dir: PathBuf,
     pub compression: CompressionOptions,
     pub fps: f32,
     pub history_secs: u64,
@@ -390,86 +387,45 @@ impl RecorderState {
     }
 }
 
-// ── Orchestration ────────────────────────────────────────────────────────────
+// ── Recording driver (worker thread) ─────────────────────────────────────────
 
-/// What the worker thread hands back to the main thread for finalization.
-struct RecordingResult {
-    actions: Vec<UserAction>,
-    stats: CompressionStats,
-    primary_meta: capture::FocusedScreenMetadata,
-    start_ms: u64,
-    end_ms: u64,
+/// Output of a recording session, handed back when the worker thread joins.
+pub struct RecorderOutput {
+    pub actions: Vec<UserAction>,
+    pub stats: CompressionStats,
+    pub started_ms: u64,
+    pub ended_ms: u64,
+    pub duration_ms: u64,
 }
 
-pub fn run(opts: RecordOptions) -> Result<()> {
-    std::fs::create_dir_all(&opts.out_dir)?;
-
-    println!("sai-recorder — opt-in recording (MimicCLI-compatible schema)");
-    println!("  mode   : {:?}", opts.mode);
-    println!("  output : {}", opts.out_dir.display());
-    print_compression(&opts.compression);
-    println!("\n● RECORDING. A floating control is on screen — click ⏹ Stop (or press <Enter> here) to finish.\n");
-
-    let shared = Shared::new();
-
-    // Worker thread: the whole capture pipeline runs off the main thread so the
-    // egui event loop can own the main thread.
-    let worker = {
-        let shared = shared.clone();
-        let opts = opts.clone();
-        std::thread::spawn(move || record_worker(opts, shared))
-    };
-
-    // Overlay owns the main thread until Stop/close; then it sets `stop`. If it
-    // can't launch, fall back to a console Enter-to-stop (single stdin reader,
-    // so it never competes with the review prompt below).
-    if !overlay::run_overlay(shared.clone()) {
-        println!("Press <Enter> to stop recording.");
-        let mut line = String::new();
-        let _ = std::io::stdin().read_line(&mut line);
-    }
-    shared.request_stop();
-
-    let result = match worker.join() {
-        Ok(r) => r?,
-        Err(_) => anyhow::bail!("recording worker thread panicked"),
-    };
-
-    println!("\n■ Stopped. {} action(s) captured.\n", result.actions.len());
-    if result.actions.is_empty() {
-        println!("Nothing recorded; exiting without writing a payload.");
-        return Ok(());
-    }
-
-    let mut stats = result.stats;
-    match opts.mode {
-        Mode::Sai => finalize_sai(&opts, &result.actions, &mut stats),
-        Mode::Dataset => finalize_dataset(
-            &opts,
-            &result.actions,
-            &mut stats,
-            result.primary_meta,
-            result.start_ms,
-            result.end_ms,
-        ),
-    }
+/// Start the capture pipeline on a background thread. Returns a join handle that
+/// yields the recorded actions + compression stats once `stop` is set.
+///
+/// `overlay_hwnd` is the float control window's HWND (as isize); input events
+/// targeting it are dropped so operating the overlay isn't recorded.
+pub fn start_worker(
+    opts: RecordOptions,
+    stop: Arc<AtomicBool>,
+    overlay_hwnd: isize,
+) -> JoinHandle<RecorderOutput> {
+    std::thread::spawn(move || run_worker(opts, stop, overlay_hwnd))
 }
 
-/// The capture pipeline (worker thread): ring buffer + listener + state machine.
-/// Drops any input event that targets the overlay before it can be recorded.
-fn record_worker(opts: RecordOptions, shared: Shared) -> Result<RecordingResult> {
-    let primary = capture::get_primary_screen();
-    let primary_meta = capture::get_screen_metadata(&primary);
-
-    let start_ms = epoch_ms();
+fn run_worker(opts: RecordOptions, stop: Arc<AtomicBool>, overlay_hwnd: isize) -> RecorderOutput {
+    let started_ms = epoch_ms();
     let recording_start = SystemTime::now();
 
-    capture::start_recording(&primary, Duration::from_secs(opts.history_secs), opts.fps)?;
+    // Ring-buffer frame pump (best-effort) + global input listener.
+    let primary = capture::get_primary_screen();
+    let _ = capture::start_recording(
+        &primary,
+        Duration::from_secs(opts.history_secs.max(1)),
+        opts.fps.max(1.0),
+    );
     let event_rx = capture::spawn_listener();
 
     let mut state = RecorderState::new(opts.compression.clone(), recording_start);
-    // Last known cursor position (rdev button/wheel events carry no coords),
-    // used for overlay hit-testing.
+    // Last known cursor (rdev button/wheel events carry no coords) for overlay hit-testing.
     let mut cursor = (0.0f64, 0.0f64);
 
     loop {
@@ -478,10 +434,8 @@ fn record_worker(opts: RecordOptions, shared: Shared) -> Result<RecordingResult>
                 if let EventType::MouseMove { x, y } = &event.event_type {
                     cursor = (*x, *y);
                 }
-                // Ignore anything aimed at the overlay (Stop click, dragging,
-                // typing while it's focused).
-                if overlay::event_targets_overlay(&event, shared.overlay_hwnd(), cursor) {
-                    continue;
+                if overlay::event_targets_overlay(&event, overlay_hwnd, cursor) {
+                    continue; // ignore the overlay's own Stop click / drag / typing
                 }
                 state.handle(event);
             }
@@ -489,7 +443,7 @@ fn record_worker(opts: RecordOptions, shared: Shared) -> Result<RecordingResult>
                 let now = SystemTime::now();
                 state.flush_typing(now, None);
                 state.flush_scroll(now, None);
-                if shared.stop_requested() {
+                if stop.load(Ordering::SeqCst) {
                     break;
                 }
             }
@@ -499,79 +453,13 @@ fn record_worker(opts: RecordOptions, shared: Shared) -> Result<RecordingResult>
     state.finish();
     capture::stop_recording().ok();
 
-    let end_ms = epoch_ms();
+    let ended_ms = epoch_ms();
     let RecorderState { actions, stats, .. } = state;
-    Ok(RecordingResult { actions, stats, primary_meta, start_ms, end_ms })
-}
-
-fn print_compression(c: &CompressionOptions) {
-    if !c.is_active() {
-        println!("  capture: lossless full-frame WebP (MimicCLI baseline)");
-        return;
+    RecorderOutput {
+        actions,
+        stats,
+        started_ms,
+        ended_ms,
+        duration_ms: ended_ms.saturating_sub(started_ms),
     }
-    let codec = if c.lossy { format!("lossy JPEG q{}", c.quality) } else { "lossless WebP".into() };
-    let scale = c.max_dim.map(|d| format!(", max {d}px")).unwrap_or_default();
-    let crop = if c.crop_focus { ", focus-cropped" } else { "" };
-    println!("  capture: {codec}{scale}{crop}");
-}
-
-fn finalize_sai(opts: &RecordOptions, actions: &[UserAction], stats: &mut CompressionStats) -> Result<()> {
-    stats.set_json(&export::structural_json(actions));
-    let json = export::sai_json(actions);
-    let path = opts.out_dir.join("actions.json");
-    std::fs::write(&path, &json)?;
-    println!("Wrote {}", path.display());
-
-    let preview = review::truncate_preview(&export::sai_json_preview(actions), 3500);
-    gated_send(opts, &preview, stats, &json)
-}
-
-fn finalize_dataset(
-    opts: &RecordOptions,
-    actions: &[UserAction],
-    stats: &mut CompressionStats,
-    primary: capture::FocusedScreenMetadata,
-    session_start_ms: u64,
-    session_end_ms: u64,
-) -> Result<()> {
-    stats.set_json(&export::structural_json(actions));
-    let manifest = export::build_manifest(
-        std::env::consts::OS.to_string(),
-        session_start_ms,
-        session_end_ms,
-        primary,
-        actions.len(),
-        stats.summary(),
-    );
-    let written = export::write_dataset(&opts.out_dir, actions, &manifest)?;
-    println!("Wrote {}", written.jsonl.display());
-    println!("Wrote {}", written.manifest.display());
-    println!("Screenshots in {}", opts.out_dir.join("screenshots").display());
-
-    let manifest_json = serde_json::to_string_pretty(&manifest).unwrap_or_default();
-    gated_send(opts, &manifest_json, stats, &manifest_json)
-}
-
-/// Print the review gate; on confirm, attempt the Telegram send.
-fn gated_send(opts: &RecordOptions, preview: &str, stats: &CompressionStats, payload: &str) -> Result<()> {
-    let tg = telegram::TelegramConfig::load();
-    let dest = match &tg {
-        Some(_) => "Telegram → your Sai agent (config found)",
-        None => "Telegram → your Sai agent (NO config — local dry-run)",
-    };
-    if review::confirm_upload(preview, stats, dest) {
-        match tg {
-            Some(cfg) => match telegram::send(&cfg, payload) {
-                Ok(()) => println!("✓ Sent to Telegram."),
-                Err(e) => println!("✗ Telegram send failed: {e}"),
-            },
-            None => println!(
-                "Confirmed, but no Telegram config present — dry-run only. \
-                 Set SAI_TG_BOT_TOKEN / SAI_TG_CHAT_ID or sai-recorder.config.json to enable."
-            ),
-        }
-    } else {
-        println!("Not sent. Output remains local at {}", opts.out_dir.display());
-    }
-    Ok(())
 }

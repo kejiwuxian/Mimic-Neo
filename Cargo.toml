@@ -2,42 +2,36 @@
 name = "sai-recorder"
 version = "0.1.0"
 edition = "2021"
-description = "Opt-in record-and-replay workflow capture (MimicCLI-compatible) with token-efficient compression, for Simular Sai and computer-use dataset collection"
+description = "Opt-in record-and-replay workflow capture with token-efficient compression (Tauri v2 UI), for Simular Sai and computer-use dataset collection"
 license = "MIT"
 
 [[bin]]
 name = "sai-recorder"
 path = "src/main.rs"
 
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
 [dependencies]
-# Global input listener. `serialize` makes rdev's native Key/Button/EventType
-# serde-serializable — we emit those native names verbatim (see types/actions.d.ts).
+# Tauri v2 UI (main window + runtime float window).
+tauri = { version = "2", features = [] }
+# Global input listener + replay via simulate(); native serde Key/Button names.
 rdev = { version = "0.5.3", features = ["serialize"] }
 # Window/monitor metadata + screenshots + ring-buffer VideoRecorder.
 xcap = { version = "0.9.6", features = ["image"] }
 # Screenshot decode (webp) + re-encode (webp lossless / jpeg lossy) + crop/downscale.
-# Boundary with xcap is raw bytes, so versions need not match.
 image = { version = "0.25", default-features = false, features = ["webp", "jpeg"] }
-# Serialization. preserve_order keeps emitted JSON key order stable (matches reference).
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
-# Base64 for inline `data:image/...;base64,` captures.
 base64 = "0.22.1"
-# Background scheduler driving the ring-buffer frame pump (as in MimicCLI capture.rs).
 timer = "0.2"
-chrono = "0.4"
-# Error plumbing (mirrors reference capture.rs).
+chrono = { version = "0.4", features = ["clock"] }
 anyhow = "1"
-# Telegram Bot API sender (kept behind the local review confirmation).
 reqwest = { version = "0.12", features = ["blocking", "json"] }
-# CLI.
-clap = { version = "4", features = ["derive"] }
-# Floating, always-on-top recording-control overlay (egui).
-eframe = "0.34"
-# Native window-handle access for the Win32 capture-exclusion call.
-raw-window-handle = "0.6"
+# App-data directory (%APPDATA%) for the task library.
+dirs = "6"
 
-# Win32 calls for capture exclusion + overlay-targeted input filtering.
+# Win32 only for dropping input events that target the float overlay window.
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58", features = [
     "Win32_Foundation",
